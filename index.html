@@ -36,9 +36,9 @@
   --bottomnav-h: 68px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrolling: touch; background: var(--bg); font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; }
 
-#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
 
 .topbar { height: var(--topbar-h); background: var(--accent); display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0; position: relative; z-index: 10; }
 .topbar-title { flex: 1; text-align: center; font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: 0.02em; }
@@ -155,15 +155,15 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg);
 .health-section-label:first-child { margin-top: 0; }
 .overview-horse-hd { padding: 14px 14px 0; font-size: 14px; font-weight: 600; color: var(--ink); }
 
-.nav-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.45); display: none; }
+.nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.45); display: none; }
 .nav-overlay.open { display: block; }
-.nav-panel { position: absolute; top: 0; left: 0; width: 72%; height: 100%; background: var(--surface); padding: 60px 0 30px; display: flex; flex-direction: column; overflow-y: auto; }
+.nav-panel { position: fixed; top: 0; left: 0; width: 72%; height: 100%; height: 100dvh; background: var(--surface); padding: 60px 0 30px; display: flex; flex-direction: column; overflow-y: auto; z-index: 1001; }
 .nav-logo { font-family: var(--font-display); font-size: 26px; color: var(--accent); padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ink); border: none; background: none; width: 100%; text-align: left; font-family: var(--font-body); }
 .nav-item svg { width: 20px; height: 20px; stroke: var(--accent-mid); fill: none; stroke-width: 1.7; }
 .nav-item:active { background: var(--accent-light); }
 
-.modal-bg { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); display: none; align-items: flex-end; }
+.modal-bg { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.55); display: none; align-items: flex-end; }
 .modal-bg.open { display: flex; }
 .modal-sheet { background: var(--surface); border-radius: 22px 22px 0 0; padding: 20px 16px 40px; width: 100%; max-height: 85vh; overflow-y: auto; }
 .modal-handle { width: 36px; height: 4px; background: var(--border-strong); border-radius: 2px; margin: 0 auto 16px; }
