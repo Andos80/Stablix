@@ -753,6 +753,33 @@ function deleteVacRecord(horseId, recId) {
   db.horses[horseId].vac.records = db.horses[horseId].vac.records.filter(r => r.id !== recId);
   saveData();
 }
+function addFeedItem(horseId, meal, text) {
+  if (!db.horses[horseId].feeding) db.horses[horseId].feeding = {breakfast:[],lunch:[],dinner:[]};
+  if (!db.horses[horseId].feeding[meal]) db.horses[horseId].feeding[meal] = [];
+  db.horses[horseId].feeding[meal].push(text);
+  saveData();
+}
+function removeFeedItem(horseId, meal, idx) {
+  db.horses[horseId].feeding?.[meal]?.splice(idx, 1);
+  saveData();
+}
+function addFeedItemFromHorse(horseId, meal) {
+  const input = document.getElementById('feed-h-' + meal);
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  addFeedItem(horseId, meal, text);
+  input.value = '';
+  renderHorseFeeding(horseId);
+}
+function addFeedItemFromMeal(horseId, meal) {
+  const input = document.getElementById('feed-m-' + horseId);
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  addFeedItem(horseId, meal, text);
+  input.value = '';
+  renderMealPage(meal);
+}
+
 function updateFarrier(horseId, data) {
   if (!db.horses[horseId].farrier) db.horses[horseId].farrier = {};
   Object.assign(db.horses[horseId].farrier, data);
@@ -801,6 +828,7 @@ function pillClass(dateStr) {
 
 let currentHorseId = null;
 let editingHorseId = null;
+let currentMeal = null;
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1029,26 +1057,59 @@ function renderActivities(horseId) {
 
 // ─── Feeding ──────────────────────────────────────────────────────────────────
 
+function _feedItemRow(item, idx, removeCall) {
+  return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+    <div class="horse-meal-item" style="flex:1;">${esc(item)}</div>
+    <button class="cal-del-btn" style="font-size:18px;margin-left:0;flex-shrink:0;" onclick="${removeCall}">×</button>
+  </div>`;
+}
+function _feedAddRow(inputId, addCall) {
+  return `<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+    <input class="modal-input" type="text" id="${inputId}" placeholder="Add item…"
+      style="flex:1;margin:0;padding:8px 10px;font-size:14px;"
+      onkeydown="if(event.key==='Enter')${addCall}">
+    <button class="add-inline-btn" onclick="${addCall}">Add</button>
+  </div>`;
+}
+
 function renderHorseFeeding(horseId) {
-  const h = db.horses[horseId];
-  const f = h.feeding || {};
+  const f = db.horses[horseId]?.feeding || {};
   const meals = [['Breakfast','07:00','breakfast'],['Lunch','12:00','lunch'],['Dinner','18:00','dinner']];
-  document.getElementById('horse-feeding-content').innerHTML = meals.map(([label,time,key]) => {
-    const items = (f[key]||[]).map(i=>`<div class="horse-meal-item">${esc(i)}</div>`).join('');
-    return `<div class="horse-meal-block"><div class="horse-meal-name">${label} · ${time}</div>${items||'<div class="horse-meal-item" style="color:var(--ink3)">—</div>'}</div>`;
+  document.getElementById('horse-feeding-content').innerHTML = meals.map(([label, time, key]) => {
+    const items = f[key] || [];
+    const rows = items.length
+      ? items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${horseId}','${key}',${idx});renderHorseFeeding('${horseId}')`)).join('')
+      : `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>`;
+    return `<div class="horse-meal-block">
+      <div class="horse-meal-name">${label} · ${time}</div>
+      ${rows}
+      ${_feedAddRow('feed-h-'+key, `addFeedItemFromHorse('${horseId}','${key}')`)}
+    </div>`;
   }).join('');
 }
 
 function openMeal(meal) {
+  currentMeal = meal;
   const labels = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner' };
   document.getElementById('meal-title').textContent = labels[meal];
-  const html = Object.values(db.horses).map(h => {
-    const items = (h.feeding?.[meal]||[]);
-    if (!items.length) return '';
-    return `<div class="horse-meal-block"><div class="horse-meal-name">${esc(h.name)}</div>${items.map(i=>`<div class="horse-meal-item">${esc(i)}</div>`).join('')}</div>`;
-  }).join('');
-  document.getElementById('meal-content').innerHTML = html || '<p class="empty-state">No feeding data.</p>';
+  renderMealPage(meal);
   showPage('pg-meal');
+}
+
+function renderMealPage(meal) {
+  const horses = Object.values(db.horses);
+  if (!horses.length) { document.getElementById('meal-content').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  document.getElementById('meal-content').innerHTML = horses.map(h => {
+    const items = h.feeding?.[meal] || [];
+    const rows = items.length
+      ? items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${h.id}','${meal}',${idx});renderMealPage('${meal}')`)).join('')
+      : `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>`;
+    return `<div class="horse-meal-block">
+      <div class="horse-meal-name">${esc(h.name)}</div>
+      ${rows}
+      ${_feedAddRow('feed-m-'+h.id, `addFeedItemFromMeal('${h.id}','${meal}')`)}
+    </div>`;
+  }).join('');
 }
 
 // ─── Vaccinations / Farrier / Dentist ─────────────────────────────────────────
