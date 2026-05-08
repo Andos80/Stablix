@@ -163,12 +163,17 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .horse-meal-item { font-size: 13px; color: var(--ink2); margin-bottom: 2px; }
 
 .files-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px; }
-.file-tile { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 8px; text-align: center; cursor: pointer; border: 1px solid var(--border); }
+.file-tile { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 8px; text-align: center; cursor: pointer; border: 1px solid var(--border); overflow: hidden; }
 .file-tile svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 1.6; display: block; margin: 0 auto 6px; }
-.file-tile p { font-size: 10px; font-weight: 500; color: var(--ink2); }
+.file-tile p { font-size: 10px; font-weight: 500; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-tile.add-tile { background: transparent; border: 1.5px dashed var(--border-strong); }
 .file-tile.add-tile svg { stroke: var(--ink3); }
 .file-tile.add-tile p { color: var(--ink3); }
+.file-thumb { width: 100%; height: 60px; object-fit: cover; display: block; border-radius: 5px 5px 0 0; margin-bottom: 5px; }
+.file-viewer-media { max-width: 100%; max-height: 58dvh; border-radius: 10px; display: block; margin: 0 auto; }
+.file-viewer-actions { display: flex; gap: 8px; margin-top: 14px; }
+.file-viewer-actions .modal-confirm { flex: 1; }
+.file-viewer-actions .btn-delete { flex: 0 0 auto; padding: 14px 18px; }
 
 .health-section-label { font-size: 13px; font-weight: 600; color: var(--ink2); margin: 14px 0 6px; }
 .health-section-label:first-child { margin-top: 0; }
@@ -298,7 +303,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
         <div class="detail-quick">
           <button class="detail-quick-btn" onclick="openActivities()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activities</button>
           <button class="detail-quick-btn" onclick="openHorseHealth()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Health</button>
-          <button class="detail-quick-btn" onclick="showPage('pg-horse-files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
+          <button class="detail-quick-btn" onclick="openHorseFilesFromHorse()"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
           <button class="detail-quick-btn" onclick="openHorseFeeding()"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding</button>
           <button class="detail-quick-btn" onclick="openHorseCosts()"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
           <button class="detail-quick-btn" onclick="openHorseNotes()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></svg>Notes</button>
@@ -339,20 +344,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
     <!-- HORSE FILES -->
     <div class="page" id="pg-horse-files">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
-      <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;">Files &amp; Album</div>
-      <div class="health-section-label">Album</div>
-      <div class="card"><div class="files-grid">
-        <div class="file-tile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Show mai</p></div>
-        <div class="file-tile"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><p>Training</p></div>
-        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><p>New</p></div>
-      </div></div>
-      <div class="health-section-label">Documents</div>
-      <div class="card"><div class="files-grid">
-        <div class="file-tile"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Passport</p></div>
-        <div class="file-tile"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Vac card</p></div>
-        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><p>Add</p></div>
-      </div></div>
+      <button class="back-btn" id="horse-files-back-btn" onclick="goBackFromFiles()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;" id="horse-files-name">Files</div>
+      <div id="horse-files-content"></div>
     </div>
 
     <!-- HORSE FEEDING -->
@@ -438,7 +432,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <!-- FILES -->
     <div class="page" id="pg-files">
       <div class="page-heading">Files</div>
-      <div class="card card-tap" style="margin-bottom:10px;" onclick="showPage('pg-horse-files')"><div class="horse-card"><div class="horse-avatar"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div><div class="horse-name">Dinero de Laubry</div><div class="horse-sub">Files &amp; album</div></div><div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div></div>
+      <div id="files-overview"></div>
     </div>
 
   </main>
@@ -470,6 +464,19 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 <!-- HIDDEN FILE INPUT -->
 <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+<input type="file" id="file-input" style="display:none" multiple onchange="handleFileUpload(this)">
+
+<!-- FILE VIEWER MODAL -->
+<div class="modal-bg" id="fileViewerModal" onclick="closeModalBg(event,'fileViewerModal')">
+  <div class="modal-sheet" style="max-height:92dvh;">
+    <div class="modal-handle"></div>
+    <div id="file-viewer-content"></div>
+    <div class="file-viewer-actions">
+      <button class="modal-confirm" onclick="downloadCurrentFile()">Download</button>
+      <button class="btn-delete" onclick="deleteCurrentFile()">Delete</button>
+    </div>
+  </div>
+</div>
 
 <!-- ACTIVITY MODAL -->
 <div class="modal-bg" id="actModal" onclick="closeModalBg(event,'actModal')">
@@ -669,6 +676,7 @@ function loadData() {
     let vri = 0;
     Object.values(d.horses).forEach(h => {
       (h.vac?.records||[]).forEach(r => { if (!r.id) { r.id = 'vr_'+(++vri); dirty = true; } });
+      if (!h.files) { h.files = []; dirty = true; }
     });
     if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
     return d;
@@ -677,11 +685,19 @@ function loadData() {
   let vri = 0;
   Object.values(seed.horses).forEach(h => {
     (h.vac?.records||[]).forEach(r => { r.id = 'vr_'+(++vri); });
+    h.files = [];
   });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
   return seed;
 }
-function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  } catch(e) {
+    alert('Storage is full. Delete some files or photos to free up space.');
+    throw e;
+  }
+}
 
 let db = loadData();
 
@@ -800,6 +816,7 @@ function bNav(page, title) {
   if (btn) btn.classList.add('active');
   if (page === 'horses') renderHorseList();
   if (page === 'calendar') renderCalendar();
+  if (page === 'files') renderFilesOverview();
   if (page === 'vaccinations') renderVaccinations();
   if (page === 'farrier') renderFarrier();
   if (page === 'dentist') renderDentist();
@@ -824,6 +841,7 @@ function handlePlusBtn() {
   if (active === 'pg-dentist') { openDentistModal(null); return; }
   if (active === 'pg-costs' || active === 'pg-horse-costs') { openCostModal(); return; }
   if (active === 'pg-horse-notes') { document.getElementById('note-input').focus(); return; }
+  if (active === 'pg-horse-files') { triggerFileUpload('any'); return; }
   if (currentHorseId) { openActModal(); return; }
 }
 
@@ -1150,6 +1168,204 @@ function saveNote() {
   addNote(currentHorseId, text);
   el.value = '';
   renderNotes(currentHorseId);
+}
+
+// ─── Files ────────────────────────────────────────────────────────────────────
+
+function addFile(horseId, fileData) {
+  if (!db.horses[horseId].files) db.horses[horseId].files = [];
+  const f = { id: 'f_' + Date.now(), ...fileData };
+  db.horses[horseId].files.unshift(f);
+  try { saveData(); } catch(e) { db.horses[horseId].files.shift(); }
+}
+function deleteFile(horseId, fileId) {
+  if (!db.horses[horseId].files) return;
+  db.horses[horseId].files = db.horses[horseId].files.filter(f => f.id !== fileId);
+  saveData();
+}
+
+function renderFilesOverview() {
+  const horses = Object.values(db.horses);
+  if (!horses.length) { document.getElementById('files-overview').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  document.getElementById('files-overview').innerHTML = horses.map(h => {
+    const count = (h.files||[]).length;
+    const avatar = h.photo
+      ? `<div class="horse-avatar" style="padding:0;overflow:hidden;"><img src="${h.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"></div>`
+      : `<div class="horse-avatar alt"><svg viewBox="0 0 24 24" stroke="var(--ink3)" fill="none" stroke-width="1.6"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>`;
+    return `<div class="card card-tap" style="margin-bottom:10px;" onclick="openHorseFiles('${h.id}')">
+      <div class="horse-card">
+        ${avatar}
+        <div style="flex:1;"><div class="horse-name">${esc(h.name)}</div><div class="horse-sub">${count} file${count !== 1 ? 's' : ''}</div></div>
+        <div class="chevron"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let filesBackTo = 'pg-horse';
+
+function openHorseFiles(id) {
+  currentHorseId = id;
+  filesBackTo = 'pg-files';
+  const h = db.horses[id];
+  document.getElementById('horse-files-name').textContent = h.name;
+  document.getElementById('topbarTitle').textContent = 'Files';
+  renderHorseFiles(id);
+  showPage('pg-horse-files');
+}
+
+function openHorseFilesFromHorse() {
+  filesBackTo = 'pg-horse';
+  const h = db.horses[currentHorseId];
+  document.getElementById('horse-files-name').textContent = h.name;
+  document.getElementById('topbarTitle').textContent = 'Files';
+  renderHorseFiles(currentHorseId);
+  showPage('pg-horse-files');
+}
+
+function goBackFromFiles() {
+  if (filesBackTo === 'pg-horse') {
+    document.getElementById('topbarTitle').textContent = db.horses[currentHorseId]?.name?.split(' ')[0] || 'Stablix';
+    showPage('pg-horse');
+  } else {
+    bNav('files', 'Files');
+  }
+}
+
+const FILE_ICON = {
+  image:    `<svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--accent)" fill="none" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+  video:    `<svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--accent)" fill="none" stroke-width="1.6"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+  document: `<svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--accent)" fill="none" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+};
+
+function _fileTile(horseId, f) {
+  const thumb = f.type === 'image'
+    ? `<img class="file-thumb" src="${f.data}" alt="${esc(f.name)}">`
+    : `<div style="padding:12px 0 6px;">${FILE_ICON[f.type]||FILE_ICON.document}</div>`;
+  return `<div class="file-tile" style="${f.type==='image'?'padding:0;':''}" onclick="viewFile('${horseId}','${f.id}')">
+    ${thumb}<p style="padding:${f.type==='image'?'0 6px 6px':'0'};">${esc(f.name)}</p>
+  </div>`;
+}
+
+function _addTile(type, label) {
+  return `<div class="file-tile add-tile" onclick="triggerFileUpload('${type}')">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><p>${label}</p>
+  </div>`;
+}
+
+function renderHorseFiles(horseId) {
+  const files = db.horses[horseId]?.files || [];
+  const images = files.filter(f => f.type === 'image');
+  const videos = files.filter(f => f.type === 'video');
+  const docs   = files.filter(f => f.type === 'document');
+
+  const section = (label, items, addType, addLabel) =>
+    `<div class="health-section-label">${label}</div>
+     <div class="card"><div class="files-grid">
+       ${items.map(f => _fileTile(horseId, f)).join('')}
+       ${_addTile(addType, addLabel)}
+     </div></div>`;
+
+  document.getElementById('horse-files-content').innerHTML =
+    section('Photos',    images, 'image',    'Add photo') +
+    section('Videos',    videos, 'video',    'Add video') +
+    section('Documents', docs,   'document', 'Add file');
+}
+
+let pendingFileType = 'any';
+
+function triggerFileUpload(type) {
+  pendingFileType = type;
+  const input = document.getElementById('file-input');
+  if (type === 'image')         input.accept = 'image/*';
+  else if (type === 'video')    input.accept = 'video/*';
+  else if (type === 'document') input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,application/pdf,application/msword,application/vnd.openxmlformats*';
+  else                          input.accept = 'image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+  input.click();
+}
+
+function handleFileUpload(input) {
+  const files = Array.from(input.files);
+  if (!files.length || !currentHorseId) return;
+  files.forEach(file => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1200;
+          let w = img.width, h = img.height;
+          if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+          else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const data = canvas.toDataURL('image/jpeg', 0.80);
+          addFile(currentHorseId, { name: file.name, type: 'image', mime: 'image/jpeg', data, date: todayStr() });
+          renderHorseFiles(currentHorseId);
+          renderFilesOverview();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      if (file.size > 50 * 1024 * 1024) {
+        alert(`"${file.name}" is too large (${(file.size/1024/1024).toFixed(0)} MB). Maximum is 50 MB.`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const fileType = file.type.startsWith('video/') ? 'video' : 'document';
+        addFile(currentHorseId, { name: file.name, type: fileType, mime: file.type, data: e.target.result, date: todayStr() });
+        renderHorseFiles(currentHorseId);
+        renderFilesOverview();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  input.value = '';
+}
+
+let viewingFileHorseId = null;
+let viewingFileId = null;
+
+function viewFile(horseId, fileId) {
+  const f = (db.horses[horseId]?.files||[]).find(x => x.id === fileId);
+  if (!f) return;
+  viewingFileHorseId = horseId;
+  viewingFileId = fileId;
+  const cont = document.getElementById('file-viewer-content');
+  if (f.type === 'image') {
+    cont.innerHTML = `<img class="file-viewer-media" src="${f.data}" alt="${esc(f.name)}">
+      <div style="margin-top:8px;font-size:12px;color:var(--ink3);">${esc(f.name)} · ${f.date||''}</div>`;
+  } else if (f.type === 'video') {
+    cont.innerHTML = `<video class="file-viewer-media" src="${f.data}" controls playsinline></video>
+      <div style="margin-top:8px;font-size:12px;color:var(--ink3);">${esc(f.name)} · ${f.date||''}</div>`;
+  } else {
+    cont.innerHTML = `<div style="padding:24px 0 8px;">
+      ${FILE_ICON.document.replace('width="24" height="24"','width="48" height="48"')}
+      <div style="margin-top:10px;font-size:15px;font-weight:600;color:var(--ink);">${esc(f.name)}</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:4px;">${f.date||''}</div>
+    </div>`;
+  }
+  openModal('fileViewerModal');
+}
+
+function downloadCurrentFile() {
+  const f = (db.horses[viewingFileHorseId]?.files||[]).find(x => x.id === viewingFileId);
+  if (!f) return;
+  const a = document.createElement('a');
+  a.href = f.data;
+  a.download = f.name;
+  a.click();
+}
+
+function deleteCurrentFile() {
+  if (!viewingFileHorseId || !viewingFileId) return;
+  deleteFile(viewingFileHorseId, viewingFileId);
+  closeModal('fileViewerModal');
+  renderHorseFiles(viewingFileHorseId);
+  renderFilesOverview();
 }
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
