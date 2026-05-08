@@ -186,6 +186,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ink); border: none; background: none; width: 100%; text-align: left; font-family: var(--font-body); }
 .nav-item svg { width: 20px; height: 20px; stroke: var(--accent-mid); fill: none; stroke-width: 1.7; }
 .nav-item:active { background: var(--accent-light); }
+.nav-divider { height: 1px; background: var(--border); margin: 8px 20px; }
 
 .modal-bg { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.55); display: none; align-items: flex-end; }
 .modal-bg.open { display: flex; }
@@ -459,12 +460,16 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <button class="nav-item" onclick="navTo('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding plan</button>
     <button class="nav-item" onclick="navTo('costs','Costs')"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
     <button class="nav-item" onclick="navTo('files','Files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" onclick="exportData();closeNav()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>Export data</button>
+    <button class="nav-item" onclick="importData()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>Import data</button>
   </div>
 </div>
 
 <!-- HIDDEN FILE INPUT -->
 <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
 <input type="file" id="file-input" style="display:none" multiple onchange="handleFileUpload(this)">
+<input type="file" id="import-input" accept=".json,application/json" style="display:none" onchange="handleImport(this)">
 
 <!-- FILE VIEWER MODAL -->
 <div class="modal-bg" id="fileViewerModal" onclick="closeModalBg(event,'fileViewerModal')">
@@ -1758,6 +1763,48 @@ function confirmCost() {
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Export / Import ──────────────────────────────────────────────────────────
+
+function closeNav() { document.getElementById('navOverlay').classList.remove('open'); }
+
+function exportData() {
+  const json = JSON.stringify(db, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = `stablix-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  document.getElementById('import-input').click();
+}
+
+function handleImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.horses) throw new Error('Not a Stablix backup');
+      if (!confirm('This will replace all your current data with the backup. Continue?')) return;
+      db = data;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      closeNav();
+      bNav('home', 'Stablix');
+      alert('Import successful! All your data has been restored.');
+    } catch(e) {
+      alert('Could not read this file. Please select a valid Stablix backup (.json).');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
