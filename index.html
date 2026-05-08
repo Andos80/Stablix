@@ -92,6 +92,10 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
 .hero-edit-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.18); border: none; border-radius: var(--radius-sm); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .hero-edit-btn:active { background: rgba(255,255,255,0.30); }
 .hero-edit-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
+.hero-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.hero-photo { width: 68px; height: 68px; border-radius: 14px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; overflow: hidden; }
+.hero-photo:active { opacity: 0.75; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .info-list { padding: 0 14px; }
 .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
@@ -265,8 +269,15 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
       <button class="back-btn" onclick="goBack('horses')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Horses</button>
       <div class="detail-hero">
         <button class="hero-edit-btn" onclick="openEditHorse()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-        <div class="detail-hero-name" id="h-name">—</div>
-        <div class="detail-hero-meta" id="h-meta">—</div>
+        <div class="hero-top">
+          <div class="hero-photo" id="hero-photo-wrap" onclick="triggerPhotoUpload()">
+            <svg viewBox="0 0 24 24" width="26" height="26" stroke="rgba(255,255,255,0.55)" fill="none" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 7l-1.5-3h-5L8 7"/><circle cx="12" cy="13.5" r="3"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;padding-right:36px;">
+            <div class="detail-hero-name" id="h-name" style="padding-right:0;">—</div>
+            <div class="detail-hero-meta" id="h-meta">—</div>
+          </div>
+        </div>
         <div class="detail-quick">
           <button class="detail-quick-btn" onclick="openActivities()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activities</button>
           <button class="detail-quick-btn" onclick="openHorseHealth()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Health</button>
@@ -448,6 +459,9 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
     <button class="nav-item" onclick="navTo('files','Files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
   </div>
 </div>
+
+<!-- HIDDEN FILE INPUT -->
+<input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
 
 <!-- ACTIVITY MODAL -->
 <div class="modal-bg" id="actModal" onclick="closeModalBg(event,'actModal')">
@@ -670,9 +684,12 @@ function renderHorseList() {
   list.innerHTML = ids.map(id => {
     const h = db.horses[id];
     const year = (h.born||'').split('.')[2] || '';
+    const avatar = h.photo
+      ? `<div class="horse-avatar" style="padding:0;overflow:hidden;"><img src="${h.photo}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;"></div>`
+      : `<div class="horse-avatar"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg></div>`;
     return `<div class="card card-tap" onclick="openHorse('${id}')">
       <div class="horse-card">
-        <div class="horse-avatar"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg></div>
+        ${avatar}
         <div style="flex:1;"><div class="horse-name">${esc(h.name)}</div><div class="horse-sub">${year ? 'f. '+year+' · ' : ''}${esc(h.breed||'')}</div></div>
         <div class="chevron"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
@@ -704,6 +721,7 @@ function openHorse(id) {
 
   document.getElementById('act-horse-name').textContent = h.name;
   document.getElementById('topbarTitle').textContent = h.name.split(' ')[0];
+  renderHeroPhoto(h.photo || null);
   showPage('pg-horse');
 }
 
@@ -735,6 +753,47 @@ function openHorseNotes() {
   renderNotes(currentHorseId);
   document.getElementById('topbarTitle').textContent = 'Notes';
   showPage('pg-horse-notes');
+}
+
+// ─── Photo ────────────────────────────────────────────────────────────────────
+
+function renderHeroPhoto(dataUrl) {
+  const wrap = document.getElementById('hero-photo-wrap');
+  if (dataUrl) {
+    wrap.innerHTML = `<img src="${dataUrl}" alt="Horse photo">`;
+  } else {
+    wrap.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" stroke="rgba(255,255,255,0.55)" fill="none" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 7l-1.5-3h-5L8 7"/><circle cx="12" cy="13.5" r="3"/></svg>`;
+  }
+}
+
+function triggerPhotoUpload() {
+  if (!currentHorseId) return;
+  document.getElementById('photo-input').click();
+}
+
+function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file || !currentHorseId) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 480;
+      let w = img.width, h = img.height;
+      if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      updateHorse(currentHorseId, { photo: dataUrl });
+      renderHeroPhoto(dataUrl);
+      renderHorseList();
+      input.value = '';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // ─── Health ───────────────────────────────────────────────────────────────────
