@@ -49,6 +49,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .topbar-title { flex: 1; text-align: center; font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: 0.02em; }
 .topbar-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-appearance: none; }
 .topbar-btn:active { background: rgba(255,255,255,0.25); }
+.topbar-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; flex-shrink: 0; }
 
 .content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 14px calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 16px); background: var(--bg); -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
 .content::-webkit-scrollbar { display: none; }
@@ -215,11 +216,11 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   <header class="topbar">
     <div class="topbar-inner">
       <button class="topbar-btn" onclick="openNav()" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <span class="topbar-title" id="topbarTitle">Stablix</span>
       <button class="topbar-btn" onclick="handlePlusBtn()" aria-label="Add">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
     </div>
   </header>
