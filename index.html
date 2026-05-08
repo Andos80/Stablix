@@ -655,7 +655,7 @@ function handlePlusBtn() {
   if (active === 'pg-horses') { openAddHorse(); return; }
   if (active === 'pg-costs' || active === 'pg-horse-costs') { openCostModal(); return; }
   if (active === 'pg-horse-notes') { document.getElementById('note-input').focus(); return; }
-  openActModal();
+  if (currentHorseId) { openActModal(); return; }
 }
 
 // ─── Horse list & detail ──────────────────────────────────────────────────────
@@ -714,22 +714,26 @@ function openActivities() {
 
 function openHorseFeeding() {
   renderHorseFeeding(currentHorseId);
+  document.getElementById('topbarTitle').textContent = 'Feeding';
   showPage('pg-horse-feeding');
 }
 
 function openHorseCosts(id) {
   if (id) currentHorseId = id;
   renderHorseCosts(currentHorseId);
+  document.getElementById('topbarTitle').textContent = 'Costs';
   showPage('pg-horse-costs');
 }
 
 function openHorseHealth() {
   renderHorseHealth(currentHorseId);
+  document.getElementById('topbarTitle').textContent = 'Health';
   showPage('pg-horse-health');
 }
 
 function openHorseNotes() {
   renderNotes(currentHorseId);
+  document.getElementById('topbarTitle').textContent = 'Notes';
   showPage('pg-horse-notes');
 }
 
