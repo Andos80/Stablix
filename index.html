@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Stablix">
 <meta name="theme-color" content="#2C4A2E">
 <title>Stablix</title>
@@ -44,9 +44,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
 
-/* Topbar: green extends behind status bar/notch, content sits below it */
-.topbar { background: var(--accent); display: flex; flex-direction: column; flex-shrink: 0; position: relative; z-index: 10; padding-top: env(safe-area-inset-top, 0px); }
-.topbar-inner { display: flex; align-items: center; height: var(--topbar-h); padding: 0 14px; gap: 10px; width: 100%; }
+.topbar { height: var(--topbar-h); background: var(--accent); display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0; position: relative; z-index: 10; }
+.topbar-inner { display: flex; align-items: center; width: 100%; height: 100%; gap: 10px; }
 .topbar-title { flex: 1; text-align: center; font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: 0.02em; }
 .topbar-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-appearance: none; }
 .topbar-btn:active { background: rgba(255,255,255,0.25); }
@@ -171,7 +170,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 .nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.45); display: none; }
 .nav-overlay.open { display: block; }
-.nav-panel { position: fixed; top: 0; left: 0; width: 72%; height: 100%; height: 100dvh; background: var(--surface); padding: calc(54px + env(safe-area-inset-top, 0px)) 0 calc(30px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; overflow-y: auto; z-index: 1001; }
+.nav-panel { position: fixed; top: 0; left: 0; width: 72%; height: 100%; height: 100dvh; background: var(--surface); padding: 60px 0 calc(30px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; overflow-y: auto; z-index: 1001; }
 .nav-logo { font-family: var(--font-display); font-size: 26px; color: var(--accent); padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ink); border: none; background: none; width: 100%; text-align: left; font-family: var(--font-body); }
 .nav-item svg { width: 20px; height: 20px; stroke: var(--accent-mid); fill: none; stroke-width: 1.7; }
