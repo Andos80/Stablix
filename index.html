@@ -44,9 +44,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
 
-/* Topbar grows upward to sit behind the translucent status bar / notch */
-.topbar { height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)); background: var(--accent); display: flex; align-items: flex-end; padding: 0 14px env(safe-area-inset-top, 8px); gap: 10px; flex-shrink: 0; position: relative; z-index: 10; }
-.topbar-inner { display: flex; align-items: center; width: 100%; height: var(--topbar-h); gap: 10px; }
+/* Topbar: green extends behind status bar/notch, content sits below it */
+.topbar { background: var(--accent); display: flex; flex-direction: column; flex-shrink: 0; position: relative; z-index: 10; padding-top: env(safe-area-inset-top, 0px); }
+.topbar-inner { display: flex; align-items: center; height: var(--topbar-h); padding: 0 14px; gap: 10px; width: 100%; }
 .topbar-title { flex: 1; text-align: center; font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: 0.02em; }
 .topbar-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-appearance: none; }
 .topbar-btn:active { background: rgba(255,255,255,0.25); }
