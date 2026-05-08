@@ -213,6 +213,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .note-text { font-size: 14px; color: var(--ink); line-height: 1.45; white-space: pre-wrap; }
 .btn-delete { width: 100%; background: var(--danger); color: #fff; border: none; border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--font-body); }
 .empty-state { color: var(--ink3); text-align: center; padding: 28px 14px; font-size: 14px; }
+.add-inline-btn { background: none; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--accent); font-size: 12px; font-weight: 500; padding: 4px 10px; cursor: pointer; font-family: var(--font-body); }
+.add-inline-btn:active { background: var(--accent-light); }
+.modal-label { font-size: 12px; color: var(--ink2); margin-bottom: 4px; display: block; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -526,6 +529,22 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   </div>
 </div>
 
+<!-- VAC MODAL -->
+<div class="modal-bg" id="vacModal" onclick="closeModalBg(event,'vacModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="vac-modal-title">Add vaccination</div>
+    <select class="modal-input" id="vac-horse-input"></select>
+    <input class="modal-input" type="text" id="vac-type-input" placeholder="Type (e.g. Influenza)">
+    <label class="modal-label">Vaccination date</label>
+    <input class="modal-input" type="date" id="vac-date-input">
+    <label class="modal-label">Next vaccination (optional)</label>
+    <input class="modal-input" type="date" id="vac-next-input">
+    <button class="modal-confirm" id="vac-modal-confirm" onclick="confirmVac()">Add</button>
+    <button class="btn-delete" id="delete-vac-btn" style="display:none;" onclick="deleteCurrentVacRec()">Delete record</button>
+  </div>
+</div>
+
 <!-- COST MODAL -->
 <div class="modal-bg" id="costModal" onclick="closeModalBg(event,'costModal')">
   <div class="modal-sheet">
@@ -613,13 +632,20 @@ function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
     const d = JSON.parse(raw);
-    if (!d.events) {
-      d.events = JSON.parse(JSON.stringify(SEED.events));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
-    }
+    let dirty = false;
+    if (!d.events) { d.events = JSON.parse(JSON.stringify(SEED.events)); dirty = true; }
+    let vri = 0;
+    Object.values(d.horses).forEach(h => {
+      (h.vac?.records||[]).forEach(r => { if (!r.id) { r.id = 'vr_'+(++vri); dirty = true; } });
+    });
+    if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
     return d;
   }
   const seed = JSON.parse(JSON.stringify(SEED));
+  let vri = 0;
+  Object.values(seed.horses).forEach(h => {
+    (h.vac?.records||[]).forEach(r => { r.id = 'vr_'+(++vri); });
+  });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
   return seed;
 }
@@ -661,6 +687,22 @@ function updateEvent(id, data) {
 }
 function deleteEvent(id) {
   db.events = db.events.filter(e => e.id !== id);
+  saveData();
+}
+function addVacRecord(horseId, rec) {
+  if (!db.horses[horseId].vac) db.horses[horseId].vac = { records: [], nextDate: '' };
+  if (!db.horses[horseId].vac.records) db.horses[horseId].vac.records = [];
+  db.horses[horseId].vac.records.push({ id: 'vr_' + Date.now(), ...rec });
+  saveData();
+}
+function updateVacRecord(horseId, recId, data) {
+  const rec = db.horses[horseId].vac?.records?.find(r => r.id === recId);
+  if (rec) Object.assign(rec, data);
+  saveData();
+}
+function deleteVacRecord(horseId, recId) {
+  if (!db.horses[horseId].vac?.records) return;
+  db.horses[horseId].vac.records = db.horses[horseId].vac.records.filter(r => r.id !== recId);
   saveData();
 }
 
@@ -735,6 +777,7 @@ function handlePlusBtn() {
   const active = document.querySelector('.page.active')?.id;
   if (active === 'pg-horses') { openAddHorse(); return; }
   if (active === 'pg-calendar') { openEventModal(); return; }
+  if (active === 'pg-vaccinations') { openVacModal(null); return; }
   if (active === 'pg-costs' || active === 'pg-horse-costs') { openCostModal(); return; }
   if (active === 'pg-horse-notes') { document.getElementById('note-input').focus(); return; }
   if (currentHorseId) { openActModal(); return; }
@@ -949,14 +992,31 @@ function openMeal(meal) {
 // ─── Vaccinations / Farrier / Dentist ─────────────────────────────────────────
 
 function renderVaccinations() {
-  document.getElementById('vac-list').innerHTML = Object.values(db.horses).map(h => {
+  const horses = Object.values(db.horses);
+  if (!horses.length) { document.getElementById('vac-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  document.getElementById('vac-list').innerHTML = horses.map(h => {
     const recs = h.vac?.records || [];
     const next = h.vac?.nextDate;
-    return `<div class="card" style="margin-bottom:10px;"><div class="overview-horse-hd">${esc(h.name)}</div><div class="info-list">
-      ${recs.map(r=>`<div class="info-row"><span class="info-key">${esc(r.type)}</span><span class="pill ${pillClass(r.date)}">${r.date}</span></div>`).join('')}
-      ${next?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${next}</span></div>`:''}
-    </div></div>`;
-  }).join('') || '<p class="empty-state">No vaccination records.</p>';
+    const recsHtml = recs.length
+      ? recs.map(r => `<div class="info-row" style="cursor:pointer;" onclick="openEditVacRec('${h.id}','${r.id}')">
+          <span class="info-key">${esc(r.type)}</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span class="pill ${pillClass(r.date)}">${r.date}</span>
+            <button class="cal-del-btn" style="margin-left:0;" onclick="event.stopPropagation();deleteVacRecAndRender('${h.id}','${r.id}')">×</button>
+          </span>
+        </div>`).join('')
+      : `<div class="info-row"><span class="info-key" style="color:var(--ink3);">No records yet</span></div>`;
+    return `<div class="card" style="margin-bottom:10px;">
+      <div class="overview-horse-hd" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>${esc(h.name)}</span>
+        <button class="add-inline-btn" onclick="openVacModal('${h.id}')">+ Add</button>
+      </div>
+      <div class="info-list">
+        ${recsHtml}
+        ${next ? `<div class="info-row"><span class="info-key">Next</span><span class="info-val">${next}</span></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderFarrier() {
@@ -1212,6 +1272,77 @@ function deleteCurrentEvent() {
   deleteEvent(editingEventId);
   closeModal('eventModal');
   renderCalendar();
+}
+
+// Vaccination modal
+let editingVacHorseId = null;
+let editingVacRecId = null;
+
+function _fillVacModal(horseId, rec) {
+  const sel = document.getElementById('vac-horse-input');
+  sel.innerHTML = Object.values(db.horses).map(h =>
+    `<option value="${h.id}"${h.id === horseId ? ' selected' : ''}>${esc(h.name)}</option>`
+  ).join('');
+  sel.disabled = !!horseId;
+  document.getElementById('vac-type-input').value = rec ? (rec.type || '') : '';
+  document.getElementById('vac-date-input').value = rec ? dmyToIso(rec.date) : dmyToIso(todayStr());
+  const nextDate = horseId ? (db.horses[horseId]?.vac?.nextDate || '') : '';
+  document.getElementById('vac-next-input').value = nextDate ? dmyToIso(nextDate) : '';
+}
+
+function openVacModal(horseId) {
+  editingVacHorseId = null;
+  editingVacRecId = null;
+  _fillVacModal(horseId, null);
+  document.getElementById('vac-modal-title').textContent = 'Add vaccination';
+  document.getElementById('vac-modal-confirm').textContent = 'Add';
+  document.getElementById('delete-vac-btn').style.display = 'none';
+  openModal('vacModal');
+}
+
+function openEditVacRec(horseId, recId) {
+  const rec = db.horses[horseId]?.vac?.records?.find(r => r.id === recId);
+  if (!rec) return;
+  editingVacHorseId = horseId;
+  editingVacRecId = recId;
+  _fillVacModal(horseId, rec);
+  document.getElementById('vac-modal-title').textContent = 'Edit vaccination';
+  document.getElementById('vac-modal-confirm').textContent = 'Save';
+  document.getElementById('delete-vac-btn').style.display = 'block';
+  openModal('vacModal');
+}
+
+function confirmVac() {
+  const horseId = document.getElementById('vac-horse-input').value;
+  const type = document.getElementById('vac-type-input').value.trim();
+  const dateIso = document.getElementById('vac-date-input').value;
+  const date = isoToDmy(dateIso);
+  const nextIso = document.getElementById('vac-next-input').value;
+  const nextDate = nextIso ? isoToDmy(nextIso) : '';
+  if (!horseId || !type || !date) return;
+  if (editingVacRecId) {
+    updateVacRecord(horseId, editingVacRecId, { type, date });
+  } else {
+    addVacRecord(horseId, { type, date });
+  }
+  if (nextDate !== undefined && db.horses[horseId].vac) {
+    db.horses[horseId].vac.nextDate = nextDate;
+    saveData();
+  }
+  closeModal('vacModal');
+  renderVaccinations();
+}
+
+function deleteCurrentVacRec() {
+  if (!editingVacHorseId || !editingVacRecId) return;
+  deleteVacRecord(editingVacHorseId, editingVacRecId);
+  closeModal('vacModal');
+  renderVaccinations();
+}
+
+function deleteVacRecAndRender(horseId, recId) {
+  deleteVacRecord(horseId, recId);
+  renderVaccinations();
 }
 
 // Cost modal
