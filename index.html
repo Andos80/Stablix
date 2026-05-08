@@ -545,6 +545,38 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   </div>
 </div>
 
+<!-- FARRIER MODAL -->
+<div class="modal-bg" id="farrierModal" onclick="closeModalBg(event,'farrierModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Farrier</div>
+    <select class="modal-input" id="farr-horse-input"></select>
+    <label class="modal-label">Last shod</label>
+    <input class="modal-input" type="date" id="farr-date-input">
+    <input class="modal-input" type="text" id="farr-type-input" placeholder="Shoe type (e.g. Full shoe)">
+    <input class="modal-input" type="text" id="farr-name-input" placeholder="Farrier name (optional)">
+    <label class="modal-label">Next appointment (optional)</label>
+    <input class="modal-input" type="date" id="farr-next-input">
+    <button class="modal-confirm" onclick="confirmFarrier()">Save</button>
+  </div>
+</div>
+
+<!-- DENTIST MODAL -->
+<div class="modal-bg" id="dentModal" onclick="closeModalBg(event,'dentModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Dentist</div>
+    <select class="modal-input" id="dent-horse-input"></select>
+    <label class="modal-label">Last visit</label>
+    <input class="modal-input" type="date" id="dent-date-input">
+    <input class="modal-input" type="text" id="dent-treatment-input" placeholder="Treatment (optional)">
+    <input class="modal-input" type="text" id="dent-name-input" placeholder="Dentist name (optional)">
+    <label class="modal-label">Next appointment (optional)</label>
+    <input class="modal-input" type="date" id="dent-next-input">
+    <button class="modal-confirm" onclick="confirmDentist()">Save</button>
+  </div>
+</div>
+
 <!-- COST MODAL -->
 <div class="modal-bg" id="costModal" onclick="closeModalBg(event,'costModal')">
   <div class="modal-sheet">
@@ -705,6 +737,16 @@ function deleteVacRecord(horseId, recId) {
   db.horses[horseId].vac.records = db.horses[horseId].vac.records.filter(r => r.id !== recId);
   saveData();
 }
+function updateFarrier(horseId, data) {
+  if (!db.horses[horseId].farrier) db.horses[horseId].farrier = {};
+  Object.assign(db.horses[horseId].farrier, data);
+  saveData();
+}
+function updateDentist(horseId, data) {
+  if (!db.horses[horseId].dent) db.horses[horseId].dent = {};
+  Object.assign(db.horses[horseId].dent, data);
+  saveData();
+}
 
 function dmyToIso(s) {
   const p = (s||'').split('.');
@@ -778,6 +820,8 @@ function handlePlusBtn() {
   if (active === 'pg-horses') { openAddHorse(); return; }
   if (active === 'pg-calendar') { openEventModal(); return; }
   if (active === 'pg-vaccinations') { openVacModal(null); return; }
+  if (active === 'pg-farrier') { openFarrierModal(null); return; }
+  if (active === 'pg-dentist') { openDentistModal(null); return; }
   if (active === 'pg-costs' || active === 'pg-horse-costs') { openCostModal(); return; }
   if (active === 'pg-horse-notes') { document.getElementById('note-input').focus(); return; }
   if (currentHorseId) { openActModal(); return; }
@@ -1020,24 +1064,37 @@ function renderVaccinations() {
 }
 
 function renderFarrier() {
-  document.getElementById('farrier-list').innerHTML = Object.values(db.horses).map(h => {
+  const horses = Object.values(db.horses);
+  if (!horses.length) { document.getElementById('farrier-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  document.getElementById('farrier-list').innerHTML = horses.map(h => {
     const f = h.farrier || {};
-    return `<div class="card" style="margin-bottom:10px;"><div class="overview-horse-hd">${esc(h.name)}</div><div class="info-list">
-      <div class="info-row"><span class="info-key">Last shod</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
-      ${f.type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${esc(f.type)}</span></div>`:''}
-      ${f.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${f.nextDate}</span></div>`:''}
-    </div></div>`;
-  }).join('') || '<p class="empty-state">No farrier records.</p>';
+    return `<div class="card card-tap" style="margin-bottom:10px;" onclick="openFarrierModal('${h.id}')">
+      <div class="overview-horse-hd">${esc(h.name)}</div>
+      <div class="info-list">
+        <div class="info-row"><span class="info-key">Last shod</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
+        ${f.type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${esc(f.type)}</span></div>`:''}
+        ${f.farrier?`<div class="info-row"><span class="info-key">Farrier</span><span class="info-val">${esc(f.farrier)}</span></div>`:''}
+        ${f.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${f.nextDate}</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderDentist() {
-  document.getElementById('dentist-list').innerHTML = Object.values(db.horses).map(h => {
+  const horses = Object.values(db.horses);
+  if (!horses.length) { document.getElementById('dentist-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  document.getElementById('dentist-list').innerHTML = horses.map(h => {
     const de = h.dent || {};
-    return `<div class="card" style="margin-bottom:10px;"><div class="overview-horse-hd">${esc(h.name)}</div><div class="info-list">
-      <div class="info-row"><span class="info-key">Last</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
-      ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
-    </div></div>`;
-  }).join('') || '<p class="empty-state">No dentist records.</p>';
+    return `<div class="card card-tap" style="margin-bottom:10px;" onclick="openDentistModal('${h.id}')">
+      <div class="overview-horse-hd">${esc(h.name)}</div>
+      <div class="info-list">
+        <div class="info-row"><span class="info-key">Last visit</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
+        ${de.treatment?`<div class="info-row"><span class="info-key">Treatment</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
+        ${de.dentist?`<div class="info-row"><span class="info-key">Dentist</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
+        ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── Costs ────────────────────────────────────────────────────────────────────
@@ -1343,6 +1400,60 @@ function deleteCurrentVacRec() {
 function deleteVacRecAndRender(horseId, recId) {
   deleteVacRecord(horseId, recId);
   renderVaccinations();
+}
+
+// Farrier modal
+function openFarrierModal(horseId) {
+  const sel = document.getElementById('farr-horse-input');
+  sel.innerHTML = Object.values(db.horses).map(h =>
+    `<option value="${h.id}"${h.id === horseId ? ' selected' : ''}>${esc(h.name)}</option>`
+  ).join('');
+  sel.disabled = !!horseId;
+  const f = horseId ? (db.horses[horseId]?.farrier || {}) : {};
+  document.getElementById('farr-date-input').value = f.lastDate ? dmyToIso(f.lastDate) : '';
+  document.getElementById('farr-type-input').value = f.type || '';
+  document.getElementById('farr-name-input').value = f.farrier || '';
+  document.getElementById('farr-next-input').value = f.nextDate ? dmyToIso(f.nextDate) : '';
+  openModal('farrierModal');
+}
+function confirmFarrier() {
+  const horseId = document.getElementById('farr-horse-input').value;
+  if (!horseId) return;
+  updateFarrier(horseId, {
+    lastDate: isoToDmy(document.getElementById('farr-date-input').value),
+    type:     document.getElementById('farr-type-input').value.trim(),
+    farrier:  document.getElementById('farr-name-input').value.trim(),
+    nextDate: isoToDmy(document.getElementById('farr-next-input').value)
+  });
+  closeModal('farrierModal');
+  renderFarrier();
+}
+
+// Dentist modal
+function openDentistModal(horseId) {
+  const sel = document.getElementById('dent-horse-input');
+  sel.innerHTML = Object.values(db.horses).map(h =>
+    `<option value="${h.id}"${h.id === horseId ? ' selected' : ''}>${esc(h.name)}</option>`
+  ).join('');
+  sel.disabled = !!horseId;
+  const de = horseId ? (db.horses[horseId]?.dent || {}) : {};
+  document.getElementById('dent-date-input').value = de.lastDate ? dmyToIso(de.lastDate) : '';
+  document.getElementById('dent-treatment-input').value = de.treatment || '';
+  document.getElementById('dent-name-input').value = de.dentist || '';
+  document.getElementById('dent-next-input').value = de.nextDate ? dmyToIso(de.nextDate) : '';
+  openModal('dentModal');
+}
+function confirmDentist() {
+  const horseId = document.getElementById('dent-horse-input').value;
+  if (!horseId) return;
+  updateDentist(horseId, {
+    lastDate:  isoToDmy(document.getElementById('dent-date-input').value),
+    treatment: document.getElementById('dent-treatment-input').value.trim(),
+    dentist:   document.getElementById('dent-name-input').value.trim(),
+    nextDate:  isoToDmy(document.getElementById('dent-next-input').value)
+  });
+  closeModal('dentModal');
+  renderDentist();
 }
 
 // Cost modal
