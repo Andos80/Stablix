@@ -137,7 +137,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 .cal-month-hd { font-family: var(--font-display); font-size: 18px; color: var(--ink); margin: 16px 0 8px; }
 .cal-month-hd:first-child { margin-top: 0; }
-.cal-event-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; margin-bottom: 6px; box-shadow: var(--shadow); }
+.cal-event-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; margin-bottom: 6px; box-shadow: var(--shadow); cursor: pointer; }
+.cal-event-item:active { transform: scale(0.99); }
 .cal-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot-farr  { background: #854F0B; }
 .dot-vac   { background: var(--danger); }
@@ -508,7 +509,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 <div class="modal-bg" id="eventModal" onclick="closeModalBg(event,'eventModal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Add event</div>
+    <div class="modal-title" id="event-modal-title">Add event</div>
     <div class="act-grid" id="event-type-grid">
       <button class="act-pick" data-type="farr" onclick="pickEvType(this)">Farrier</button>
       <button class="act-pick" data-type="vac" onclick="pickEvType(this)">Vaccination</button>
@@ -518,9 +519,10 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <button class="act-pick" data-type="other" onclick="pickEvType(this)">Other</button>
     </div>
     <select class="modal-input" id="ev-horse-input"></select>
-    <input class="modal-input" type="text" id="ev-date-input" placeholder="Date (DD.MM.YYYY)">
+    <input class="modal-input" type="date" id="ev-date-input">
     <input class="modal-input" type="text" id="ev-title-input" placeholder="Title (optional)">
-    <button class="modal-confirm" onclick="confirmEvent()">Add event</button>
+    <button class="modal-confirm" id="event-modal-confirm" onclick="confirmEvent()">Add event</button>
+    <button class="btn-delete" id="delete-event-btn" style="display:none;" onclick="deleteCurrentEvent()">Delete event</button>
   </div>
 </div>
 
@@ -652,9 +654,25 @@ function addEvent(data) {
   db.events.unshift({ id: 'ev_' + Date.now(), ...data });
   saveData();
 }
+function updateEvent(id, data) {
+  const ev = db.events.find(e => e.id === id);
+  if (ev) Object.assign(ev, data);
+  saveData();
+}
 function deleteEvent(id) {
   db.events = db.events.filter(e => e.id !== id);
   saveData();
+}
+
+function dmyToIso(s) {
+  const p = (s||'').split('.');
+  if (p.length < 3) return '';
+  return `${p[2]}-${p[1]}-${p[0]}`;
+}
+function isoToDmy(s) {
+  const p = (s||'').split('-');
+  if (p.length < 3) return '';
+  return `${p[2]}.${p[1]}.${p[0]}`;
 }
 
 function todayStr() {
@@ -1045,11 +1063,11 @@ function renderCalendar() {
       const dot = DOT_CLASS[e.type] || 'dot-other';
       const label = e.title || TYPE_LABEL[e.type] || e.type;
       const dd = (e.date||'').slice(0,5);
-      return `<div class="cal-event-item">
+      return `<div class="cal-event-item" onclick="openEditEvent('${e.id}')">
         <span class="cal-dot ${dot}"></span>
         <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(label)}</div><div class="cal-ev-horse">${esc(e.horse||'')}</div></div>
         <span class="cal-ev-date">${dd}</span>
-        <button class="cal-del-btn" onclick="deleteEventAndRender('${e.id}')" aria-label="Delete">×</button>
+        <button class="cal-del-btn" onclick="event.stopPropagation();deleteEventAndRender('${e.id}')" aria-label="Delete">×</button>
       </div>`;
     }).join('');
     return `<div class="cal-month-hd">${month}</div>${items}`;
@@ -1131,28 +1149,67 @@ function confirmDeleteHorse() {
 }
 
 // Event modal
-function openEventModal() {
+let editingEventId = null;
+
+function _fillEventModal(e) {
   const sel = document.getElementById('ev-horse-input');
   sel.innerHTML = '<option value="">— Select horse —</option>' +
-    Object.values(db.horses).map(h => `<option value="${esc(h.name)}">${esc(h.name)}</option>`).join('');
-  document.getElementById('ev-date-input').value = todayStr();
-  document.getElementById('ev-title-input').value = '';
-  document.querySelectorAll('#event-type-grid .act-pick').forEach(b => b.classList.remove('sel'));
+    Object.values(db.horses).map(h =>
+      `<option value="${esc(h.name)}"${e && e.horse === h.name ? ' selected' : ''}>${esc(h.name)}</option>`
+    ).join('');
+  document.getElementById('ev-date-input').value = e ? dmyToIso(e.date) : dmyToIso(todayStr());
+  document.getElementById('ev-title-input').value = e ? (e.title || '') : '';
+  document.querySelectorAll('#event-type-grid .act-pick').forEach(b =>
+    b.classList.toggle('sel', !!(e && b.dataset.type === e.type))
+  );
+}
+
+function openEventModal() {
+  editingEventId = null;
+  _fillEventModal(null);
+  document.getElementById('event-modal-title').textContent = 'Add event';
+  document.getElementById('event-modal-confirm').textContent = 'Add event';
+  document.getElementById('delete-event-btn').style.display = 'none';
   openModal('eventModal');
 }
+
+function openEditEvent(id) {
+  const e = db.events.find(ev => ev.id === id);
+  if (!e) return;
+  editingEventId = id;
+  _fillEventModal(e);
+  document.getElementById('event-modal-title').textContent = 'Edit event';
+  document.getElementById('event-modal-confirm').textContent = 'Save';
+  document.getElementById('delete-event-btn').style.display = 'block';
+  openModal('eventModal');
+}
+
 function pickEvType(btn) {
   document.querySelectorAll('#event-type-grid .act-pick').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
 }
+
 function confirmEvent() {
   const sel = document.querySelector('#event-type-grid .act-pick.sel');
   if (!sel) return;
   const type = sel.dataset.type;
   const horse = document.getElementById('ev-horse-input').value.trim();
-  const date = document.getElementById('ev-date-input').value.trim();
-  const title = document.getElementById('ev-title-input').value.trim() || TYPE_LABEL[type];
+  const dateIso = document.getElementById('ev-date-input').value;
+  const date = isoToDmy(dateIso);
   if (!date) { document.getElementById('ev-date-input').focus(); return; }
-  addEvent({ type, title, horse, date });
+  const title = document.getElementById('ev-title-input').value.trim() || TYPE_LABEL[type];
+  if (editingEventId) {
+    updateEvent(editingEventId, { type, title, horse, date });
+  } else {
+    addEvent({ type, title, horse, date });
+  }
+  closeModal('eventModal');
+  renderCalendar();
+}
+
+function deleteCurrentEvent() {
+  if (!editingEventId) return;
+  deleteEvent(editingEventId);
   closeModal('eventModal');
   renderCalendar();
 }
