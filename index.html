@@ -231,7 +231,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="page active" id="pg-home">
       <div class="home-menu">
         <button class="home-menu-btn" onclick="navTo('calendar','Calendar')">
-          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
           <span>Calendar</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
@@ -256,12 +256,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
         <button class="home-menu-btn" onclick="bNav('feeding','Feeding plan')">
-          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg></div>
           <span>Feeding plan</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
         <button class="home-menu-btn" onclick="bNav('costs','Costs')">
-          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           <span>Costs</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
@@ -291,9 +291,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
           <button class="detail-quick-btn" onclick="openActivities()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activities</button>
           <button class="detail-quick-btn" onclick="openHorseHealth()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Health</button>
           <button class="detail-quick-btn" onclick="showPage('pg-horse-files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
-          <button class="detail-quick-btn" onclick="openHorseFeeding()"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Feeding</button>
-          <button class="detail-quick-btn" onclick="openHorseCosts()"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
-          <button class="detail-quick-btn" onclick="openHorseNotes()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Notes</button>
+          <button class="detail-quick-btn" onclick="openHorseFeeding()"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding</button>
+          <button class="detail-quick-btn" onclick="openHorseCosts()"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
+          <button class="detail-quick-btn" onclick="openHorseNotes()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></svg>Notes</button>
         </div>
       </div>
       <div class="card">
@@ -319,7 +319,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 4px;" id="act-horse-name">—</div>
       <div id="activities-list"></div>
-      <button class="add-btn-full" onclick="openActModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add activity</button>
+      <button class="add-btn-full" onclick="openActModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add activity</button>
     </div>
 
     <!-- HORSE HEALTH -->
@@ -337,13 +337,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <div class="card"><div class="files-grid">
         <div class="file-tile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Show mai</p></div>
         <div class="file-tile"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><p>Training</p></div>
-        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><p>New</p></div>
+        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><p>New</p></div>
       </div></div>
       <div class="health-section-label">Documents</div>
       <div class="card"><div class="files-grid">
         <div class="file-tile"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Passport</p></div>
         <div class="file-tile"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Vac card</p></div>
-        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><p>Add</p></div>
+        <div class="file-tile add-tile"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><p>Add</p></div>
       </div></div>
     </div>
 
@@ -359,7 +359,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 4px;" id="horse-costs-name">—</div>
       <div id="horse-costs-list"></div>
-      <button class="add-btn-full" onclick="openCostModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add cost</button>
+      <button class="add-btn-full" onclick="openCostModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add cost</button>
     </div>
 
     <!-- HORSE NOTES -->
@@ -370,7 +370,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <div class="card" style="margin-top:10px;">
         <div style="padding:12px;">
           <textarea class="modal-textarea" id="note-input" placeholder="Write a note..."></textarea>
-          <button class="add-btn-full" style="margin-top:0;" onclick="saveNote()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add note</button>
+          <button class="add-btn-full" style="margin-top:0;" onclick="saveNote()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add note</button>
         </div>
       </div>
     </div>
@@ -421,7 +421,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="page" id="pg-horses">
       <div class="page-heading">Horses</div>
       <div id="horses-list"></div>
-      <button class="add-btn-full" onclick="openAddHorse()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add horse</button>
+      <button class="add-btn-full" onclick="openAddHorse()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add horse</button>
     </div>
 
     <!-- DENTIST -->
@@ -446,9 +446,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
   <nav class="bottom-nav">
     <button class="bnav-btn active" id="bn-home" onclick="bNav('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
-    <button class="bnav-btn" id="bn-calendar" onclick="bNav('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar</button>
+    <button class="bnav-btn" id="bn-calendar" onclick="bNav('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendar</button>
     <button class="bnav-btn" id="bn-horses" onclick="bNav('horses','Horses')"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg>Horses</button>
-    <button class="bnav-btn" id="bn-feeding" onclick="bNav('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Feeding</button>
+    <button class="bnav-btn" id="bn-feeding" onclick="bNav('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding</button>
   </nav>
 
 </div>
@@ -458,13 +458,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   <div class="nav-panel">
     <div class="nav-logo">Stablix</div>
     <button class="nav-item" onclick="navTo('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
-    <button class="nav-item" onclick="navTo('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar</button>
+    <button class="nav-item" onclick="navTo('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendar</button>
     <button class="nav-item" onclick="navTo('horses','Horses')"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg>Horses</button>
     <button class="nav-item" onclick="navTo('vaccinations','Vaccinations')"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Vaccinations</button>
     <button class="nav-item" onclick="navTo('farrier','Farrier')"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Farrier</button>
     <button class="nav-item" onclick="navTo('dentist','Dentist')"><svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 7 6c-.5 2.5.5 4 1 6 .5 2 .5 4 1 6h6c.5-2 .5-4 1-6 .5-2 1.5-3.5 1-6-.5-2.5-2.5-4-5-4z"/></svg>Dentist</button>
-    <button class="nav-item" onclick="navTo('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Feeding plan</button>
-    <button class="nav-item" onclick="navTo('costs','Costs')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
+    <button class="nav-item" onclick="navTo('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding plan</button>
+    <button class="nav-item" onclick="navTo('costs','Costs')"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
     <button class="nav-item" onclick="navTo('files','Files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
   </div>
 </div>
@@ -485,7 +485,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Vet check</button>
       <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Massage</button>
       <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Walker</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Pole work</button>
+      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Pole work</button>
       <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Treadmill</button>
     </div>
     <input class="modal-input" type="text" id="act-note-input" placeholder="Note (optional)">
@@ -844,7 +844,7 @@ const ACT_STYLE = {
   'Vet check':{ cls:'act-vet',   icon:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' },
   Massage:   { cls:'act-massage', icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' },
   Walker:    { cls:'act-walk',    icon:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>' },
-  'Pole work':{ cls:'act-walk',  icon:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>' },
+  'Pole work':{ cls:'act-walk',  icon:'<path d="M8 6h13M8 12h13M8 18h13"/>' },
   Treadmill: { cls:'act-walk',    icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
 };
 
