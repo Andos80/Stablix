@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stablix">
+<meta name="theme-color" content="#2C4A2E">
 <title>Stablix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -36,20 +38,25 @@
   --bottomnav-h: 68px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrolling: touch; background: var(--bg); font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+html { height: 100%; height: -webkit-fill-available; }
+body { height: 100%; min-height: -webkit-fill-available; width: 100%; overflow: hidden; background: var(--bg); font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family: var(--font-body); }
 
 #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
 
-.topbar { height: var(--topbar-h); background: var(--accent); display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0; position: relative; z-index: 10; }
+/* Topbar grows upward to sit behind the translucent status bar / notch */
+.topbar { height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)); background: var(--accent); display: flex; align-items: flex-end; padding: 0 14px env(safe-area-inset-top, 8px); gap: 10px; flex-shrink: 0; position: relative; z-index: 10; }
+.topbar-inner { display: flex; align-items: center; width: 100%; height: var(--topbar-h); gap: 10px; }
 .topbar-title { flex: 1; text-align: center; font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: 0.02em; }
-.topbar-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.topbar-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-appearance: none; }
 .topbar-btn:active { background: rgba(255,255,255,0.25); }
 
-.content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 14px calc(var(--bottomnav-h) + 16px); background: var(--bg); -webkit-overflow-scrolling: touch; }
+.content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 14px calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 16px); background: var(--bg); -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
 .content::-webkit-scrollbar { display: none; }
 .content { -ms-overflow-style: none; scrollbar-width: none; }
 
-.bottom-nav { height: var(--bottomnav-h); background: var(--surface); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0); }
+/* Bottom nav grows downward to sit above the home indicator */
+.bottom-nav { height: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; align-items: flex-start; padding-top: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
 .bnav-btn { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: var(--ink3); font-family: var(--font-body); font-size: 10px; font-weight: 500; padding: 8px 4px; transition: color 0.15s; }
 .bnav-btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.7; fill: none; }
 .bnav-btn.active { color: var(--accent); }
@@ -164,7 +171,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
 
 .nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.45); display: none; }
 .nav-overlay.open { display: block; }
-.nav-panel { position: fixed; top: 0; left: 0; width: 72%; height: 100%; height: 100dvh; background: var(--surface); padding: 60px 0 30px; display: flex; flex-direction: column; overflow-y: auto; z-index: 1001; }
+.nav-panel { position: fixed; top: 0; left: 0; width: 72%; height: 100%; height: 100dvh; background: var(--surface); padding: calc(54px + env(safe-area-inset-top, 0px)) 0 calc(30px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; overflow-y: auto; z-index: 1001; }
 .nav-logo { font-family: var(--font-display); font-size: 26px; color: var(--accent); padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ink); border: none; background: none; width: 100%; text-align: left; font-family: var(--font-body); }
 .nav-item svg { width: 20px; height: 20px; stroke: var(--accent-mid); fill: none; stroke-width: 1.7; }
@@ -172,7 +179,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
 
 .modal-bg { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.55); display: none; align-items: flex-end; }
 .modal-bg.open { display: flex; }
-.modal-sheet { background: var(--surface); border-radius: 22px 22px 0 0; padding: 20px 16px 40px; width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-sheet { background: var(--surface); border-radius: 22px 22px 0 0; padding: 20px 16px calc(28px + env(safe-area-inset-bottom, 0px)); width: 100%; max-height: 85dvh; overflow-y: auto; }
 .modal-handle { width: 36px; height: 4px; background: var(--border-strong); border-radius: 2px; margin: 0 auto 16px; }
 .modal-title { font-family: var(--font-display); font-size: 20px; color: var(--ink); margin-bottom: 14px; }
 .act-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -183,9 +190,9 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
 .modal-confirm { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: var(--font-body); }
 .modal-confirm:active { opacity: 0.85; }
 .modal-note { font-size: 12px; color: var(--ink3); text-align: center; margin-top: 8px; }
-.modal-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); color: var(--ink); background: var(--surface2); margin-bottom: 12px; outline: none; }
+.modal-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 16px; font-family: var(--font-body); color: var(--ink); background: var(--surface2); margin-bottom: 12px; outline: none; }
 .modal-input:focus { border-color: var(--accent-mid); }
-.modal-textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); color: var(--ink); background: var(--surface2); margin-bottom: 12px; outline: none; min-height: 80px; resize: none; display: block; }
+.modal-textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 16px; font-family: var(--font-body); color: var(--ink); background: var(--surface2); margin-bottom: 12px; outline: none; min-height: 80px; resize: none; display: block; }
 .modal-textarea:focus { border-color: var(--accent-mid); }
 .home-menu { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
 .home-menu-btn { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; font-family: var(--font-body); font-size: 17px; font-weight: 500; color: var(--ink); box-shadow: var(--shadow); transition: transform 0.1s; }
@@ -207,13 +214,15 @@ html, body { height: 100%; width: 100%; overflow: hidden; -webkit-overflow-scrol
 <div id="app">
 
   <header class="topbar">
-    <button class="topbar-btn" onclick="openNav()" aria-label="Menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <span class="topbar-title" id="topbarTitle">Stablix</span>
-    <button class="topbar-btn" onclick="handlePlusBtn()" aria-label="Add">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
+    <div class="topbar-inner">
+      <button class="topbar-btn" onclick="openNav()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="topbarTitle">Stablix</span>
+      <button class="topbar-btn" onclick="handlePlusBtn()" aria-label="Add">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
   </header>
 
   <main class="content" id="mainContent">
