@@ -139,10 +139,14 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .cal-month-hd:first-child { margin-top: 0; }
 .cal-event-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; margin-bottom: 6px; box-shadow: var(--shadow); }
 .cal-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.dot-farr { background: #854F0B; }
-.dot-vac  { background: var(--danger); }
-.dot-dent { background: #9D174D; }
-.dot-show { background: #6B21A8; }
+.dot-farr  { background: #854F0B; }
+.dot-vac   { background: var(--danger); }
+.dot-dent  { background: #9D174D; }
+.dot-show  { background: #6B21A8; }
+.dot-vet   { background: #185fa5; }
+.dot-other { background: var(--ink3); }
+.cal-del-btn { margin-left: 8px; background: none; border: none; color: var(--ink3); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 4px; border-radius: 6px; flex-shrink: 0; }
+.cal-del-btn:active { color: var(--danger); background: var(--danger-light); }
 .cal-ev-name { font-size: 13px; font-weight: 500; color: var(--ink); }
 .cal-ev-horse { font-size: 11px; color: var(--ink3); margin-top: 1px; }
 .cal-ev-date { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--ink3); white-space: nowrap; }
@@ -378,16 +382,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <!-- CALENDAR -->
     <div class="page" id="pg-calendar">
       <div class="page-heading">Calendar</div>
-      <div class="cal-month-hd">Mai 2026</div>
-      <div class="cal-event-item"><span class="cal-dot dot-farr"></span><div><div class="cal-ev-name">Farrier</div><div class="cal-ev-horse">Dinero de Laubry</div></div><span class="cal-ev-date">01.05</span></div>
-      <div class="cal-event-item"><span class="cal-dot dot-show"></span><div><div class="cal-ev-name">Show</div><div class="cal-ev-horse">Saga, Dinero</div></div><span class="cal-ev-date">10.05</span></div>
-      <div class="cal-event-item"><span class="cal-dot dot-farr"></span><div><div class="cal-ev-name">Farrier</div><div class="cal-ev-horse">Clinton III</div></div><span class="cal-ev-date">15.05</span></div>
-      <div class="cal-event-item"><span class="cal-dot dot-vac"></span><div><div class="cal-ev-name">Vaccination</div><div class="cal-ev-horse">Bay Venture</div></div><span class="cal-ev-date">28.05</span></div>
-      <div class="cal-month-hd">Juni 2026</div>
-      <div class="cal-event-item"><span class="cal-dot dot-vac"></span><div><div class="cal-ev-name">Vaccination</div><div class="cal-ev-horse">Dinero de Laubry</div></div><span class="cal-ev-date">02.06</span></div>
-      <div class="cal-event-item"><span class="cal-dot dot-show"></span><div><div class="cal-ev-name">Show</div><div class="cal-ev-horse">Saga de Moyon</div></div><span class="cal-ev-date">14.06</span></div>
-      <div class="cal-month-hd">Oktober 2026</div>
-      <div class="cal-event-item"><span class="cal-dot dot-dent"></span><div><div class="cal-ev-name">Dentist</div><div class="cal-ev-horse">Dinero de Laubry</div></div><span class="cal-ev-date">24.10</span></div>
+      <div id="calendar-list"></div>
     </div>
 
     <!-- VACCINATIONS -->
@@ -509,6 +504,26 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   </div>
 </div>
 
+<!-- EVENT MODAL -->
+<div class="modal-bg" id="eventModal" onclick="closeModalBg(event,'eventModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add event</div>
+    <div class="act-grid" id="event-type-grid">
+      <button class="act-pick" data-type="farr" onclick="pickEvType(this)">Farrier</button>
+      <button class="act-pick" data-type="vac" onclick="pickEvType(this)">Vaccination</button>
+      <button class="act-pick" data-type="dent" onclick="pickEvType(this)">Dentist</button>
+      <button class="act-pick" data-type="show" onclick="pickEvType(this)">Show</button>
+      <button class="act-pick" data-type="vet" onclick="pickEvType(this)">Vet</button>
+      <button class="act-pick" data-type="other" onclick="pickEvType(this)">Other</button>
+    </div>
+    <select class="modal-input" id="ev-horse-input"></select>
+    <input class="modal-input" type="text" id="ev-date-input" placeholder="Date (DD.MM.YYYY)">
+    <input class="modal-input" type="text" id="ev-title-input" placeholder="Title (optional)">
+    <button class="modal-confirm" onclick="confirmEvent()">Add event</button>
+  </div>
+</div>
+
 <!-- COST MODAL -->
 <div class="modal-bg" id="costModal" onclick="closeModalBg(event,'costModal')">
   <div class="modal-sheet">
@@ -580,12 +595,28 @@ const SEED = {
       feeding:{breakfast:['1 L Musli','3,5 kg hay'],lunch:['3,5 kg hay'],dinner:['1 L Musli · 4 kg hay']},
       activities:[], costs:[], notes:[]
     }
-  }
+  },
+  events: [
+    {id:'ev1',type:'farr',title:'Farrier',      horse:'Dinero de Laubry', date:'01.05.2026'},
+    {id:'ev2',type:'show',title:'Show',          horse:'Saga, Dinero',     date:'10.05.2026'},
+    {id:'ev3',type:'farr',title:'Farrier',       horse:'Clinton III',      date:'15.05.2026'},
+    {id:'ev4',type:'vac', title:'Vaccination',   horse:'Bay Venture',      date:'28.05.2026'},
+    {id:'ev5',type:'vac', title:'Vaccination',   horse:'Dinero de Laubry', date:'02.06.2026'},
+    {id:'ev6',type:'show',title:'Show',          horse:'Saga de Moyon',    date:'14.06.2026'},
+    {id:'ev7',type:'dent',title:'Dentist',       horse:'Dinero de Laubry', date:'24.10.2026'}
+  ]
 };
 
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    const d = JSON.parse(raw);
+    if (!d.events) {
+      d.events = JSON.parse(JSON.stringify(SEED.events));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+    return d;
+  }
   const seed = JSON.parse(JSON.stringify(SEED));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
   return seed;
@@ -615,6 +646,14 @@ function addCost(horseId, data) {
 }
 function addNote(horseId, text) {
   db.horses[horseId].notes.unshift({ id: 'n_' + Date.now(), text, date: todayStr() });
+  saveData();
+}
+function addEvent(data) {
+  db.events.unshift({ id: 'ev_' + Date.now(), ...data });
+  saveData();
+}
+function deleteEvent(id) {
+  db.events = db.events.filter(e => e.id !== id);
   saveData();
 }
 
@@ -658,6 +697,7 @@ function bNav(page, title) {
   const btn = document.getElementById('bn-' + page);
   if (btn) btn.classList.add('active');
   if (page === 'horses') renderHorseList();
+  if (page === 'calendar') renderCalendar();
   if (page === 'vaccinations') renderVaccinations();
   if (page === 'farrier') renderFarrier();
   if (page === 'dentist') renderDentist();
@@ -676,6 +716,7 @@ function goBack(page) {
 function handlePlusBtn() {
   const active = document.querySelector('.page.active')?.id;
   if (active === 'pg-horses') { openAddHorse(); return; }
+  if (active === 'pg-calendar') { openEventModal(); return; }
   if (active === 'pg-costs' || active === 'pg-horse-costs') { openCostModal(); return; }
   if (active === 'pg-horse-notes') { document.getElementById('note-input').focus(); return; }
   if (currentHorseId) { openActModal(); return; }
@@ -976,6 +1017,50 @@ function saveNote() {
   renderNotes(currentHorseId);
 }
 
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+
+const NO_MONTHS = ['Januar','Februar','Mars','April','Mai','Juni','Juli','August','September','Oktober','November','Desember'];
+const DOT_CLASS  = { farr:'dot-farr', vac:'dot-vac', dent:'dot-dent', show:'dot-show', vet:'dot-vet', other:'dot-other' };
+const TYPE_LABEL = { farr:'Farrier', vac:'Vaccination', dent:'Dentist', show:'Show', vet:'Vet', other:'Other' };
+
+function renderCalendar() {
+  const events = (db.events||[]).slice().sort((a,b) => {
+    const da = parseDMY(a.date), db2 = parseDMY(b.date);
+    return (da ? da.getTime() : 0) - (db2 ? db2.getTime() : 0);
+  });
+  if (!events.length) {
+    document.getElementById('calendar-list').innerHTML = '<p class="empty-state">No events yet. Tap + to add one.</p>';
+    return;
+  }
+  const groups = {};
+  const keys = [];
+  events.forEach(e => {
+    const d = parseDMY(e.date);
+    const key = d ? NO_MONTHS[d.getMonth()] + ' ' + d.getFullYear() : 'Unknown';
+    if (!groups[key]) { groups[key] = []; keys.push(key); }
+    groups[key].push(e);
+  });
+  document.getElementById('calendar-list').innerHTML = keys.map(month => {
+    const items = groups[month].map(e => {
+      const dot = DOT_CLASS[e.type] || 'dot-other';
+      const label = e.title || TYPE_LABEL[e.type] || e.type;
+      const dd = (e.date||'').slice(0,5);
+      return `<div class="cal-event-item">
+        <span class="cal-dot ${dot}"></span>
+        <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(label)}</div><div class="cal-ev-horse">${esc(e.horse||'')}</div></div>
+        <span class="cal-ev-date">${dd}</span>
+        <button class="cal-del-btn" onclick="deleteEventAndRender('${e.id}')" aria-label="Delete">×</button>
+      </div>`;
+    }).join('');
+    return `<div class="cal-month-hd">${month}</div>${items}`;
+  }).join('');
+}
+
+function deleteEventAndRender(id) {
+  deleteEvent(id);
+  renderCalendar();
+}
+
 // ─── Modals ───────────────────────────────────────────────────────────────────
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -1043,6 +1128,33 @@ function confirmDeleteHorse() {
   deleteHorse(editingHorseId);
   closeModal('horseModal');
   bNav('horses', 'Horses');
+}
+
+// Event modal
+function openEventModal() {
+  const sel = document.getElementById('ev-horse-input');
+  sel.innerHTML = '<option value="">— Select horse —</option>' +
+    Object.values(db.horses).map(h => `<option value="${esc(h.name)}">${esc(h.name)}</option>`).join('');
+  document.getElementById('ev-date-input').value = todayStr();
+  document.getElementById('ev-title-input').value = '';
+  document.querySelectorAll('#event-type-grid .act-pick').forEach(b => b.classList.remove('sel'));
+  openModal('eventModal');
+}
+function pickEvType(btn) {
+  document.querySelectorAll('#event-type-grid .act-pick').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function confirmEvent() {
+  const sel = document.querySelector('#event-type-grid .act-pick.sel');
+  if (!sel) return;
+  const type = sel.dataset.type;
+  const horse = document.getElementById('ev-horse-input').value.trim();
+  const date = document.getElementById('ev-date-input').value.trim();
+  const title = document.getElementById('ev-title-input').value.trim() || TYPE_LABEL[type];
+  if (!date) { document.getElementById('ev-date-input').focus(); return; }
+  addEvent({ type, title, horse, date });
+  closeModal('eventModal');
+  renderCalendar();
 }
 
 // Cost modal
