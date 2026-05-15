@@ -135,6 +135,19 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .add-btn-full:active { opacity: 0.85; }
 .add-btn-full svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
 
+.cal-nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-nav-title { font-family: var(--font-display); font-size: 20px; color: var(--ink); }
+.cal-nav-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 14px; font-size: 20px; cursor: pointer; color: var(--ink); font-family: var(--font-body); line-height: 1.4; }
+.cal-weekdays { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 2px; }
+.cal-weekdays span { text-align: center; font-size: 11px; font-weight: 600; color: var(--ink3); padding: 3px 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+.cal-cell { min-height: 56px; padding: 4px 2px 3px; display: flex; flex-direction: column; align-items: center; cursor: pointer; border-radius: 8px; }
+.cal-cell:active { background: var(--surface2); }
+.cal-cell-num { font-size: 14px; font-weight: 500; color: var(--ink); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.cal-cell.cal-today .cal-cell-num { background: var(--accent); color: #fff; font-weight: 700; }
+.cal-cell-bars { display: flex; flex-direction: column; gap: 2px; margin-top: 3px; width: 76%; }
+.cal-bar2 { height: 3px; border-radius: 2px; width: 100%; }
+.color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
 .cal-month-hd { font-family: var(--font-display); font-size: 18px; color: var(--ink); margin: 16px 0 8px; }
 .cal-month-hd:first-child { margin-top: 0; }
 .cal-event-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; margin-bottom: 6px; box-shadow: var(--shadow); cursor: pointer; }
@@ -394,8 +407,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
     <!-- CALENDAR -->
     <div class="page" id="pg-calendar">
-      <div class="page-heading">Calendar</div>
-      <div id="calendar-list"></div>
+      <div class="cal-nav-bar">
+        <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+        <span id="cal-nav-title" class="cal-nav-title"></span>
+        <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+      </div>
+      <div class="cal-weekdays"><span>M</span><span>T</span><span>O</span><span>T</span><span>F</span><span>L</span><span>S</span></div>
+      <div id="cal-grid"></div>
     </div>
 
     <!-- VACCINATIONS -->
@@ -527,6 +545,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <input class="modal-input" type="text" id="hf-sire" placeholder="Sire">
     <input class="modal-input" type="text" id="hf-dam" placeholder="Dam">
     <input class="modal-input" type="text" id="hf-color" placeholder="Colour">
+    <label class="modal-label">Colour on calendar</label>
+    <div id="horse-calcolor-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
     <button class="modal-confirm" onclick="confirmHorse()">Save</button>
     <button class="btn-delete" id="delete-horse-btn" style="display:none;" onclick="confirmDeleteHorse()">Delete horse</button>
   </div>
@@ -621,6 +641,16 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   </div>
 </div>
 
+<!-- CAL DAY DETAIL MODAL -->
+<div class="modal-bg" id="calDayModal" onclick="closeModalBg(event,'calDayModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="calDay-title"></div>
+    <div id="calDay-content"></div>
+    <button class="modal-confirm" style="margin-top:4px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);" onclick="closeModal('calDayModal');openEventModal(_calDetailDate)">+ Add event</button>
+  </div>
+</div>
+
 <!-- FEED PROFILE MODAL -->
 <div class="modal-bg" id="feedProfileModal" onclick="closeModalBg(event,'feedProfileModal')">
   <div class="modal-sheet">
@@ -654,6 +684,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 // ─── Data layer ───────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'stablix_v1';
+
+const CAL_COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#795548','#607d8b'];
 
 const COMPOUND_FEEDS = ['High Fibre Cubes (L)','High Fibre Mix (L)','Top Line Conditioning Mix (L)','Ease & Excel Cubes (L)','Fibre Beet (L)','Outshine (Cup)','Competition Mix (L)','Senior Mix (L)','Keep Calm (L)','Balancer (Cup)','Alfa Alfa Plus Oil','Golden Grass','Ultra Grass'];
 const SUPPLEMENTS   = ['Electrolytes','Muscle Relax','Relax','Relax Pro','Hemachol','Immunotop','Respitop','P-block','Lacta-Fort','Top Competition','Energy Gel','Gastryl','Gastro Care+','Pro Motion','Muscle Care','Arti-Gold','Arti-Sport'];
@@ -746,6 +778,8 @@ function loadData() {
       });
     });
     if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
+    let _ci = 0;
+    Object.values(d.horses).forEach(h => { if (!h.calColor) { h.calColor = CAL_COLORS[_ci % CAL_COLORS.length]; _ci++; dirty = true; } });
     if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
     return d;
   }
@@ -771,6 +805,7 @@ let db = loadData();
 
 function addHorse(data) {
   const id = 'h_' + Date.now();
+  if (!data.calColor) data.calColor = CAL_COLORS[Object.keys(db.horses).length % CAL_COLORS.length];
   db.horses[id] = { id, ...data, farrier:{}, vac:{records:[]}, dent:{}, feeding:{breakfast:[],lunch:[],dinner:[]}, feedProfile:{compounds:[],supplements:[],hay:[]}, activities:[], costs:[], notes:[] };
   saveData();
   return id;
@@ -897,6 +932,10 @@ function pillClass(dateStr) {
 let currentHorseId = null;
 let editingHorseId = null;
 let currentMeal = null;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let _selectedCalColor = CAL_COLORS[0];
+let _calDetailDate = null;
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1689,37 +1728,82 @@ const NO_MONTHS = ['Januar','Februar','Mars','April','Mai','Juni','Juli','August
 const DOT_CLASS  = { farr:'dot-farr', vac:'dot-vac', dent:'dot-dent', show:'dot-show', vet:'dot-vet', other:'dot-other' };
 const TYPE_LABEL = { farr:'Farrier', vac:'Vaccination', dent:'Dentist', show:'Show', vet:'Vet', other:'Other' };
 
+function calPrevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+
 function renderCalendar() {
-  const events = (db.events||[]).slice().sort((a,b) => {
-    const da = parseDMY(a.date), db2 = parseDMY(b.date);
-    return (da ? da.getTime() : 0) - (db2 ? db2.getTime() : 0);
+  document.getElementById('cal-nav-title').textContent = NO_MONTHS[calMonth] + ' ' + calYear;
+  const today = new Date();
+  const firstDow = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const startCol = (firstDow + 6) % 7; // Mon=0
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  // Build day→horses map
+  const horses = Object.values(db.horses);
+  const dayMap = {}; // 'DD.MM.YYYY' -> [{id,calColor}]
+  const seen = (date, id) => dayMap[date]?.some(x => x.id === id);
+  const mark = (date, h) => { if (!date) return; if (!dayMap[date]) dayMap[date]=[]; if (!seen(date,h.id)) dayMap[date].push({id:h.id, calColor:h.calColor||'#3498db'}); };
+
+  (db.events||[]).forEach(ev => {
+    if (!ev.date) return;
+    const hn = (ev.horse||'').toLowerCase();
+    const matched = horses.find(h => hn && (hn.includes(h.name.toLowerCase()) || h.name.toLowerCase().includes(hn)));
+    if (matched) mark(ev.date, matched);
+    else if (ev.date) { // unmatched event: show with neutral bar
+      if (!dayMap[ev.date]) dayMap[ev.date]=[];
+      if (!dayMap[ev.date].some(x=>x.id==='_ev')) dayMap[ev.date].push({id:'_ev', calColor:'#94a3b8'});
+    }
   });
-  if (!events.length) {
-    document.getElementById('calendar-list').innerHTML = '<p class="empty-state">No events yet. Tap + to add one.</p>';
-    return;
+  horses.forEach(h => (h.activities||[]).forEach(a => mark(a.date, h)));
+
+  const totalCells = startCol + daysInMonth;
+  const rows = Math.ceil(totalCells / 7);
+  let cells = '';
+  for (let i = 0; i < rows * 7; i++) {
+    const day = i - startCol + 1;
+    if (day < 1 || day > daysInMonth) { cells += `<div class="cal-cell"></div>`; continue; }
+    const dd = String(day).padStart(2,'0'), mm = String(calMonth+1).padStart(2,'0');
+    const dStr = `${dd}.${mm}.${calYear}`;
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===day;
+    const bars = (dayMap[dStr]||[]).slice(0,5).map(x=>`<span class="cal-bar2" style="background:${x.calColor};"></span>`).join('');
+    cells += `<div class="cal-cell${isToday?' cal-today':''}" onclick="openDayDetail('${dStr}')">
+      <span class="cal-cell-num">${day}</span>
+      <div class="cal-cell-bars">${bars}</div>
+    </div>`;
   }
-  const groups = {};
-  const keys = [];
-  events.forEach(e => {
-    const d = parseDMY(e.date);
-    const key = d ? NO_MONTHS[d.getMonth()] + ' ' + d.getFullYear() : 'Unknown';
-    if (!groups[key]) { groups[key] = []; keys.push(key); }
-    groups[key].push(e);
+  document.getElementById('cal-grid').innerHTML = cells;
+}
+
+function openDayDetail(dateStr) {
+  _calDetailDate = dateStr;
+  const d = parseDMY(dateStr);
+  document.getElementById('calDay-title').textContent = d
+    ? d.getDate() + '. ' + NO_MONTHS[d.getMonth()] + ' ' + d.getFullYear() : dateStr;
+  renderDayDetail(dateStr);
+  openModal('calDayModal');
+}
+function renderDayDetail(dateStr) {
+  const dayEvents = (db.events||[]).filter(e => e.date === dateStr);
+  const dayActs = [];
+  Object.values(db.horses).forEach(h => (h.activities||[]).forEach(a => { if (a.date === dateStr) dayActs.push({h, a}); }));
+  let html = '';
+  dayEvents.forEach(e => {
+    const dot = DOT_CLASS[e.type] || 'dot-other';
+    const label = e.title || TYPE_LABEL[e.type] || e.type;
+    html += `<div class="cal-event-item" onclick="closeModal('calDayModal');openEditEvent('${e.id}')">
+      <span class="cal-dot ${dot}"></span>
+      <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(label)}</div><div class="cal-ev-horse">${esc(e.horse||'')}</div></div>
+      <button class="cal-del-btn" onclick="event.stopPropagation();deleteEvent('${e.id}');renderCalendar();renderDayDetail('${dateStr}')" aria-label="Delete">×</button>
+    </div>`;
   });
-  document.getElementById('calendar-list').innerHTML = keys.map(month => {
-    const items = groups[month].map(e => {
-      const dot = DOT_CLASS[e.type] || 'dot-other';
-      const label = e.title || TYPE_LABEL[e.type] || e.type;
-      const dd = (e.date||'').slice(0,5);
-      return `<div class="cal-event-item" onclick="openEditEvent('${e.id}')">
-        <span class="cal-dot ${dot}"></span>
-        <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(label)}</div><div class="cal-ev-horse">${esc(e.horse||'')}</div></div>
-        <span class="cal-ev-date">${dd}</span>
-        <button class="cal-del-btn" onclick="event.stopPropagation();deleteEventAndRender('${e.id}')" aria-label="Delete">×</button>
-      </div>`;
-    }).join('');
-    return `<div class="cal-month-hd">${month}</div>${items}`;
-  }).join('');
+  dayActs.forEach(({h, a}) => {
+    html += `<div class="cal-event-item">
+      <span class="cal-dot" style="background:${h.calColor||'#3498db'};"></span>
+      <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(a.type)}</div><div class="cal-ev-horse">${esc(h.name)}${a.note?' · '+esc(a.note):''}</div></div>
+    </div>`;
+  });
+  if (!html) html = '<p class="empty-state" style="margin:8px 0 12px;">Nothing scheduled.</p>';
+  document.getElementById('calDay-content').innerHTML = html;
 }
 
 function deleteEventAndRender(id) {
@@ -1747,11 +1831,25 @@ function confirmActivity() {
 }
 
 // Horse modal
+function renderCalColorPicker(sel) {
+  document.getElementById('horse-calcolor-picker').innerHTML = CAL_COLORS.map(c =>
+    `<button type="button" class="color-swatch" data-color="${c}" style="background:${c};${c===sel?`box-shadow:0 0 0 3px white,0 0 0 5px ${c};`:''}" onclick="pickHorseCalColor(this)"></button>`
+  ).join('');
+  _selectedCalColor = sel || CAL_COLORS[0];
+}
+function pickHorseCalColor(btn) {
+  _selectedCalColor = btn.dataset.color;
+  document.querySelectorAll('#horse-calcolor-picker .color-swatch').forEach(b => {
+    b.style.boxShadow = b.dataset.color === _selectedCalColor ? `0 0 0 3px white,0 0 0 5px ${_selectedCalColor}` : '';
+  });
+}
+
 function openAddHorse() {
   editingHorseId = null;
   document.getElementById('horse-modal-title').textContent = 'Add horse';
   ['hf-name','hf-breed','hf-born','hf-sire','hf-dam','hf-color'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('delete-horse-btn').style.display = 'none';
+  renderCalColorPicker(CAL_COLORS[Object.keys(db.horses).length % CAL_COLORS.length]);
   openModal('horseModal');
 }
 function openEditHorse() {
@@ -1765,6 +1863,7 @@ function openEditHorse() {
   document.getElementById('hf-sire').value = h.sire || '';
   document.getElementById('hf-dam').value = h.dam || '';
   document.getElementById('hf-color').value = h.color || '';
+  renderCalColorPicker(h.calColor || CAL_COLORS[0]);
   document.getElementById('delete-horse-btn').style.display = 'block';
   openModal('horseModal');
 }
@@ -1776,7 +1875,8 @@ function confirmHorse() {
     born: document.getElementById('hf-born').value.trim(),
     sire: document.getElementById('hf-sire').value.trim(),
     dam: document.getElementById('hf-dam').value.trim(),
-    color: document.getElementById('hf-color').value.trim()
+    color: document.getElementById('hf-color').value.trim(),
+    calColor: _selectedCalColor
   };
   if (editingHorseId) {
     updateHorse(editingHorseId, data);
@@ -1812,9 +1912,10 @@ function _fillEventModal(e) {
   );
 }
 
-function openEventModal() {
+function openEventModal(prefillDmy) {
   editingEventId = null;
   _fillEventModal(null);
+  if (prefillDmy) document.getElementById('ev-date-input').value = dmyToIso(prefillDmy);
   document.getElementById('event-modal-title').textContent = 'Add event';
   document.getElementById('event-modal-confirm').textContent = 'Add event';
   document.getElementById('delete-event-btn').style.display = 'none';
