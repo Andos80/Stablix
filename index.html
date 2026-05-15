@@ -553,7 +553,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <option value="ISH">Irish Sport Horse (ISH)</option>
       <option value="ISL">Icelandic Horse (ISL)</option>
     </select>
-    <input class="modal-input" type="text" id="hf-born" placeholder="Date of birth (DD.MM.YYYY)">
+    <input class="modal-input" type="date" id="hf-born">
     <input class="modal-input" type="text" id="hf-sire" placeholder="Sire">
     <input class="modal-input" type="text" id="hf-dam" placeholder="Dam">
     <select class="modal-input" id="hf-color">
@@ -1891,7 +1891,7 @@ function openEditHorse() {
   document.getElementById('horse-modal-title').textContent = 'Edit horse';
   document.getElementById('hf-name').value = h.name || '';
   document.getElementById('hf-breed').value = h.breed || '';
-  document.getElementById('hf-born').value = h.born || '';
+  document.getElementById('hf-born').value = h.born ? dmyToIso(h.born) : '';
   document.getElementById('hf-sire').value = h.sire || '';
   document.getElementById('hf-dam').value = h.dam || '';
   document.getElementById('hf-color').value = h.color || '';
@@ -1904,7 +1904,7 @@ function confirmHorse() {
   if (!name) { document.getElementById('hf-name').focus(); return; }
   const data = {
     name, breed: document.getElementById('hf-breed').value.trim(),
-    born: document.getElementById('hf-born').value.trim(),
+    born: isoToDmy(document.getElementById('hf-born').value),
     sire: document.getElementById('hf-sire').value.trim(),
     dam: document.getElementById('hf-dam').value.trim(),
     color: document.getElementById('hf-color').value.trim(),
