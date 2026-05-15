@@ -196,6 +196,15 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .modal-handle { width: 36px; height: 4px; background: var(--border-strong); border-radius: 2px; margin: 0 auto 16px; }
 .modal-title { font-family: var(--font-display); font-size: 20px; color: var(--ink); margin-bottom: 14px; }
 .act-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.act-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 16px; }
+.feed-horse-row { padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.feed-horse-row:last-child { border-bottom: none; }
+.feed-horse-row:active { background: var(--surface2); }
+.feed-horse-row-name { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+.feed-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.feed-tag { font-size: 10px; font-weight: 500; background: var(--accent-light); color: var(--accent); padding: 2px 7px; border-radius: 20px; }
+.feed-tag-supp { background: #f0fdf4; color: #16a34a; }
+.feed-section-head { font-size: 12px; font-weight: 700; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 8px; }
 .act-pick { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 6px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ink2); font-family: var(--font-body); transition: all 0.15s; }
 .act-pick svg { width: 20px; height: 20px; stroke: var(--ink2); fill: none; stroke-width: 1.7; display: block; margin: 0 auto 5px; }
 .act-pick.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -609,6 +618,19 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   </div>
 </div>
 
+<!-- FEED PROFILE MODAL -->
+<div class="modal-bg" id="feedProfileModal" onclick="closeModalBg(event,'feedProfileModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="feedProfile-title">Feed profile</div>
+    <label class="modal-label">Compound feed</label>
+    <div class="act-grid-2" id="feedProfile-compounds"></div>
+    <label class="modal-label">Supplements</label>
+    <div class="act-grid" id="feedProfile-supplements"></div>
+    <button class="modal-confirm" onclick="saveFeedProfile()">Save</button>
+  </div>
+</div>
+
 <!-- MEAL TIME MODAL -->
 <div class="modal-bg" id="mealTimeModal" onclick="closeModalBg(event,'mealTimeModal')">
   <div class="modal-sheet">
@@ -624,6 +646,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 // ─── Data layer ───────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'stablix_v1';
+
+const COMPOUND_FEEDS = ['High Fibre Cubes (L)','High Fibre Mix (L)','Top Line Conditioning Mix (L)','Ease & Excel Cubes (L)','Fibre Beet (L)','Outshine (Cup)','Competition Mix (L)','Senior Mix (L)','Keep Calm (L)','Balancer (Cup)','Alfa Alfa Plus Oil','Golden Grass','Ultra Grass'];
+const SUPPLEMENTS   = ['Electrolytes','Muscle Relax','Relax','Relax Pro','Hemachol','Immunotop','Respitop','P-block','Lacta-Fort','Top Competition','Energy Gel','Gastryl','Gastro Care+','Pro Motion','Muscle Care','Arti-Gold','Arti-Sport'];
 
 const SEED = {
   horses: {
@@ -694,6 +719,7 @@ function loadData() {
     Object.values(d.horses).forEach(h => {
       (h.vac?.records||[]).forEach(r => { if (!r.id) { r.id = 'vr_'+(++vri); dirty = true; } });
       if (!h.files) { h.files = []; dirty = true; }
+      if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[]}; dirty = true; }
     });
     if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
     if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
@@ -721,7 +747,7 @@ let db = loadData();
 
 function addHorse(data) {
   const id = 'h_' + Date.now();
-  db.horses[id] = { id, ...data, farrier:{}, vac:{records:[]}, dent:{}, feeding:{breakfast:[],lunch:[],dinner:[]}, activities:[], costs:[], notes:[] };
+  db.horses[id] = { id, ...data, farrier:{}, vac:{records:[]}, dent:{}, feeding:{breakfast:[],lunch:[],dinner:[]}, feedProfile:{compounds:[],supplements:[]}, activities:[], costs:[], notes:[] };
   saveData();
   return id;
 }
@@ -1079,7 +1105,7 @@ function renderActivities(horseId) {
 function renderFeedingOverview() {
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
   const meals = [['Breakfast','breakfast'],['Lunch','lunch'],['Dinner','dinner']];
-  document.getElementById('feeding-list').innerHTML = meals.map(([label, key]) => `
+  const mealBtns = meals.map(([label, key]) => `
     <button class="meal-btn" onclick="openMeal('${key}')">
       <div>
         <div class="meal-btn-name">${label}</div>
@@ -1093,6 +1119,51 @@ function renderFeedingOverview() {
       <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
   `).join('');
+
+  const horses = Object.values(db.horses);
+  const horseRows = horses.length
+    ? horses.map(h => {
+        const fp = h.feedProfile || {compounds:[], supplements:[]};
+        const cTags = fp.compounds.map(c => `<span class="feed-tag">${esc(c)}</span>`).join('');
+        const sTags = fp.supplements.map(s => `<span class="feed-tag feed-tag-supp">${esc(s)}</span>`).join('');
+        const tags = cTags + sTags || `<span style="font-size:12px;color:var(--ink3);">Nothing selected</span>`;
+        return `<div class="feed-horse-row" onclick="openFeedProfile('${h.id}')">
+          <div class="feed-horse-row-name">${esc(h.name)}</div>
+          <div class="feed-tags">${tags}</div>
+        </div>`;
+      }).join('')
+    : `<div style="padding:14px;font-size:13px;color:var(--ink3);">No horses yet.</div>`;
+
+  document.getElementById('feeding-list').innerHTML =
+    mealBtns +
+    `<div class="feed-section-head" style="margin-top:20px;">Feed &amp; Supplements</div>` +
+    `<div class="card">${horseRows}</div>`;
+}
+
+let _feedProfileHorseId = null;
+function openFeedProfile(horseId) {
+  _feedProfileHorseId = horseId;
+  const h = db.horses[horseId];
+  document.getElementById('feedProfile-title').textContent = h.name;
+  const fp = h.feedProfile || {compounds:[], supplements:[]};
+
+  document.getElementById('feedProfile-compounds').innerHTML =
+    COMPOUND_FEEDS.map(f => `<button class="act-pick${fp.compounds.includes(f)?' sel':''}" onclick="toggleFeedPick(this)">${esc(f)}</button>`).join('');
+
+  document.getElementById('feedProfile-supplements').innerHTML =
+    SUPPLEMENTS.map(s => `<button class="act-pick${fp.supplements.includes(s)?' sel':''}" onclick="toggleFeedPick(this)">${esc(s)}</button>`).join('');
+
+  openModal('feedProfileModal');
+}
+function toggleFeedPick(btn) { btn.classList.toggle('sel'); }
+function saveFeedProfile() {
+  const h = db.horses[_feedProfileHorseId];
+  if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[]};
+  h.feedProfile.compounds = [...document.querySelectorAll('#feedProfile-compounds .act-pick.sel')].map(b => b.textContent);
+  h.feedProfile.supplements = [...document.querySelectorAll('#feedProfile-supplements .act-pick.sel')].map(b => b.textContent);
+  saveData();
+  closeModal('feedProfileModal');
+  renderFeedingOverview();
 }
 
 let _editingMealKey = null;
