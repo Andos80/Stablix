@@ -73,7 +73,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .card-tap:active { transform: scale(0.99); }
 
 .horse-card { display: flex; align-items: center; gap: 12px; padding: 14px; }
-.horse-avatar { width: 50px; height: 50px; border-radius: 12px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.horse-avatar { width: 58px; height: 58px; border-radius: 13px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .horse-avatar svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 1.6; }
 .horse-avatar.alt { background: var(--surface2); }
 .horse-avatar.alt svg { stroke: var(--ink3); }
@@ -993,13 +993,19 @@ function renderHorseList() {
   list.innerHTML = ids.map(id => {
     const h = db.horses[id];
     const year = (h.born||'').split('.')[2] || '';
+    const lineage = [h.sire, h.dam].filter(Boolean).join(' × ');
+    const sub1 = [h.breed, year ? 'f. '+year : ''].filter(Boolean).join(' · ');
     const avatar = h.photo
-      ? `<div class="horse-avatar" style="padding:0;overflow:hidden;"><img src="${h.photo}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;"></div>`
+      ? `<div class="horse-avatar" style="padding:0;overflow:hidden;"><img src="${h.photo}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:13px;"></div>`
       : `<div class="horse-avatar"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg></div>`;
     return `<div class="card card-tap" onclick="openHorse('${id}')">
       <div class="horse-card">
         ${avatar}
-        <div style="flex:1;"><div class="horse-name">${esc(h.name)}</div><div class="horse-sub">${year ? 'f. '+year+' · ' : ''}${esc(h.breed||'')}</div></div>
+        <div style="flex:1;min-width:0;">
+          <div class="horse-name">${esc(h.name)}</div>
+          ${sub1 ? `<div class="horse-sub">${esc(sub1)}</div>` : ''}
+          ${lineage ? `<div class="horse-sub" style="font-size:11px;margin-top:1px;">${esc(lineage)}</div>` : ''}
+        </div>
         <div class="chevron"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
     </div>`;
