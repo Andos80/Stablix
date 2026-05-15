@@ -544,7 +544,18 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <input class="modal-input" type="text" id="hf-born" placeholder="Date of birth (DD.MM.YYYY)">
     <input class="modal-input" type="text" id="hf-sire" placeholder="Sire">
     <input class="modal-input" type="text" id="hf-dam" placeholder="Dam">
-    <input class="modal-input" type="text" id="hf-color" placeholder="Colour">
+    <select class="modal-input" id="hf-color">
+      <option value="">Colour (optional)</option>
+      <option value="Bay">Bay</option>
+      <option value="Chestnut (Red)">Chestnut (Red)</option>
+      <option value="Black">Black</option>
+      <option value="Gray">Gray</option>
+      <option value="Palomino">Palomino</option>
+      <option value="Buckskin">Buckskin</option>
+      <option value="Roan">Roan</option>
+      <option value="Dun">Dun</option>
+      <option value="Pinto">Pinto</option>
+    </select>
     <label class="modal-label">Colour on calendar</label>
     <div id="horse-calcolor-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
     <button class="modal-confirm" onclick="confirmHorse()">Save</button>
