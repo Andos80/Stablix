@@ -540,7 +540,19 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title" id="horse-modal-title">Add horse</div>
     <input class="modal-input" type="text" id="hf-name" placeholder="Name *">
-    <input class="modal-input" type="text" id="hf-breed" placeholder="Breed">
+    <select class="modal-input" id="hf-breed">
+      <option value="">Breed (optional)</option>
+      <option value="KWPN">Dutch Warmblood (KWPN)</option>
+      <option value="HANN">Hanoverian (HANN)</option>
+      <option value="HOLST">Holsteiner (HOLST)</option>
+      <option value="OLD">Oldenburg (OLD)</option>
+      <option value="SF">Selle Français (SF)</option>
+      <option value="ZANG">Zangersheide (ZANG)</option>
+      <option value="PRE">Andalusian (PRE)</option>
+      <option value="LUSIT">Lusitano (LUSIT)</option>
+      <option value="ISH">Irish Sport Horse (ISH)</option>
+      <option value="ISL">Icelandic Horse (ISL)</option>
+    </select>
     <input class="modal-input" type="text" id="hf-born" placeholder="Date of birth (DD.MM.YYYY)">
     <input class="modal-input" type="text" id="hf-sire" placeholder="Sire">
     <input class="modal-input" type="text" id="hf-dam" placeholder="Dam">
