@@ -1314,18 +1314,28 @@ function _feedAddRow(inputId, addCall) {
   </div>`;
 }
 
+function _profileRowsForMeal(h, mealKey) {
+  const fp = h.feedProfile || {hay:[], compounds:[], supplements:[]};
+  const parts = [];
+  (fp.hay||[]).forEach(x => { if (x[mealKey]) parts.push(x.name + ' ' + x[mealKey] + 'kg'); });
+  (fp.compounds||[]).forEach(x => { if (x[mealKey]) parts.push(x.name + ' ' + x[mealKey] + (x.unit||'L')); });
+  (fp.supplements||[]).forEach(x => { if (x[mealKey]) parts.push(x.name + ' ' + x[mealKey] + 'g'); });
+  return parts.map(item => `<div class="horse-meal-item">${esc(item)}</div>`).join('');
+}
+
 function renderHorseFeeding(horseId) {
-  const f = db.horses[horseId]?.feeding || {};
+  const h = db.horses[horseId];
+  const f = h?.feeding || {};
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
   const meals = [['Breakfast', mt.breakfast, 'breakfast'],['Lunch', mt.lunch, 'lunch'],['Dinner', mt.dinner, 'dinner']];
   document.getElementById('horse-feeding-content').innerHTML = meals.map(([label, time, key]) => {
+    const profileRows = _profileRowsForMeal(h, key);
     const items = f[key] || [];
-    const rows = items.length
-      ? items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${horseId}','${key}',${idx});renderHorseFeeding('${horseId}')`)).join('')
-      : `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>`;
+    const manualRows = items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${horseId}','${key}',${idx});renderHorseFeeding('${horseId}')`)).join('');
+    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>` : '';
     return `<div class="horse-meal-block">
       <div class="horse-meal-name">${label} · ${time}</div>
-      ${rows}
+      ${profileRows}${manualRows}${empty}
       ${_feedAddRow('feed-h-'+key, `addFeedItemFromHorse('${horseId}','${key}')`)}
     </div>`;
   }).join('');
@@ -1344,13 +1354,13 @@ function renderMealPage(meal) {
   const horses = Object.values(db.horses);
   if (!horses.length) { document.getElementById('meal-content').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
   document.getElementById('meal-content').innerHTML = horses.map(h => {
+    const profileRows = _profileRowsForMeal(h, meal);
     const items = h.feeding?.[meal] || [];
-    const rows = items.length
-      ? items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${h.id}','${meal}',${idx});renderMealPage('${meal}')`)).join('')
-      : `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>`;
+    const manualRows = items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${h.id}','${meal}',${idx});renderMealPage('${meal}')`)).join('');
+    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>` : '';
     return `<div class="horse-meal-block">
       <div class="horse-meal-name">${esc(h.name)}</div>
-      ${rows}
+      ${profileRows}${manualRows}${empty}
       ${_feedAddRow('feed-m-'+h.id, `addFeedItemFromMeal('${h.id}','${meal}')`)}
     </div>`;
   }).join('');
