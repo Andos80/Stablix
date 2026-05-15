@@ -205,6 +205,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .feed-tag { font-size: 10px; font-weight: 500; background: var(--accent-light); color: var(--accent); padding: 2px 7px; border-radius: 20px; }
 .feed-tag-supp { background: #f0fdf4; color: #16a34a; }
 .feed-section-head { font-size: 12px; font-weight: 700; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 8px; }
+.feed-item-block { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; }
+.unit-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--ink2); cursor: pointer; font-family: var(--font-body); }
+.unit-btn.ut-sel { background: var(--accent); border-color: var(--accent); color: #fff; }
 .act-pick { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 6px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 500; color: var(--ink2); font-family: var(--font-body); transition: all 0.15s; }
 .act-pick svg { width: 20px; height: 20px; stroke: var(--ink2); fill: none; stroke-width: 1.7; display: block; margin: 0 auto 5px; }
 .act-pick.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -728,9 +731,18 @@ function loadData() {
       if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[], hay:[]}; dirty = true; }
       else if (!h.feedProfile.hay) { h.feedProfile.hay = []; dirty = true; }
       ['hay','compounds','supplements'].forEach(k => {
-        if (h.feedProfile[k]?.length && typeof h.feedProfile[k][0] === 'string') {
-          h.feedProfile[k] = h.feedProfile[k].map(name => ({name, amount:''})); dirty = true;
-        }
+        if (!h.feedProfile[k]) { h.feedProfile[k] = []; dirty = true; return; }
+        h.feedProfile[k] = h.feedProfile[k].map(item => {
+          if (typeof item === 'string') { dirty = true; return {name:item, breakfast:'', lunch:'', dinner:''}; }
+          if (!('breakfast' in item)) {
+            dirty = true;
+            const r = {name:item.name, breakfast:item.amount||'', lunch:'', dinner:''};
+            if (k === 'compounds') r.unit = item.unit||'L';
+            return r;
+          }
+          if (k === 'compounds' && !item.unit) { dirty = true; return {...item, unit:'L'}; }
+          return item;
+        });
       });
     });
     if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
@@ -1135,16 +1147,22 @@ function renderFeedingOverview() {
   const horses = Object.values(db.horses);
   const horseRows = horses.length
     ? horses.map(h => {
-        const fp = h.feedProfile || {compounds:[], supplements:[], hay:[]};
-        const _n = x => typeof x === 'string' ? x : x.name;
-        const _a = (x, u) => (typeof x === 'object' && x.amount) ? ` · ${x.amount}${u}` : '';
-        const hTags = (fp.hay||[]).map(x => `<span class="feed-tag" style="background:#fef9c3;color:#854d0e;">${esc(_n(x))}${_a(x,'kg')}</span>`).join('');
-        const cTags = fp.compounds.map(x => `<span class="feed-tag">${esc(_n(x))}${_a(x,'kg')}</span>`).join('');
-        const sTags = fp.supplements.map(x => `<span class="feed-tag feed-tag-supp">${esc(_n(x))}${_a(x,'g')}</span>`).join('');
-        const tags = hTags + cTags + sTags || `<span style="font-size:12px;color:var(--ink3);">Nothing selected</span>`;
+        const fp = h.feedProfile || {hay:[], compounds:[], supplements:[]};
+        const mealLine = key => {
+          const parts = [];
+          (fp.hay||[]).forEach(x => { if (x[key]) parts.push(esc(x.name)+' '+x[key]+'kg'); });
+          (fp.compounds||[]).forEach(x => { if (x[key]) parts.push(esc(x.name)+' '+x[key]+(x.unit||'L')); });
+          (fp.supplements||[]).forEach(x => { if (x[key]) parts.push(esc(x.name)+' '+x[key]+'g'); });
+          return parts.join(' · ');
+        };
+        const rows = [['Breakfast','breakfast'],['Lunch','lunch'],['Dinner','dinner']]
+          .map(([label,key]) => { const line = mealLine(key); return line ? `<div style="font-size:12px;color:var(--ink2);margin-bottom:2px;"><span style="font-weight:600;color:var(--ink3);">${label}: </span>${line}</div>` : ''; })
+          .join('');
+        const hasItems = (fp.hay||[]).length||(fp.compounds||[]).length||(fp.supplements||[]).length;
+        const body = rows || `<span style="font-size:12px;color:var(--ink3);">${hasItems?'No amounts set yet':'Nothing selected'}</span>`;
         return `<div class="feed-horse-row" onclick="openFeedProfile('${h.id}')">
           <div class="feed-horse-row-name">${esc(h.name)}</div>
-          <div class="feed-tags">${tags}</div>
+          <div style="margin-top:3px;">${body}</div>
         </div>`;
       }).join('')
     : `<div style="padding:14px;font-size:13px;color:var(--ink3);">No horses yet.</div>`;
@@ -1156,47 +1174,88 @@ function renderFeedingOverview() {
 }
 
 let _feedProfileHorseId = null;
+let _fpStored = {};
+
 function openFeedProfile(horseId) {
   _feedProfileHorseId = horseId;
   const h = db.horses[horseId];
   document.getElementById('feedProfile-title').textContent = h.name;
-  const fp = h.feedProfile || {compounds:[], supplements:[], hay:[]};
+  const fp = h.feedProfile || {hay:[], compounds:[], supplements:[]};
   const getName = x => typeof x === 'string' ? x : x.name;
-  const getAmt  = x => typeof x === 'object' ? (x.amount || '') : '';
 
-  const buildGrid = (id, list, items, unit) => {
+  _fpStored = {};
+  ['hay','compounds','supplements'].forEach(k => {
+    (fp[k]||[]).forEach(x => { _fpStored[k+'/'+getName(x)] = typeof x === 'object' ? x : {name:getName(x)}; });
+  });
+
+  const buildGrid = (id, section, list, unit) => {
     document.getElementById(id).innerHTML = list.map(item => {
-      const stored = items.find(x => getName(x) === item);
-      const amt = stored ? getAmt(stored) : '';
-      return `<button class="act-pick${stored?' sel':''}" data-amount="${amt}" onclick="toggleFeedPick(this,'${id.replace('feedProfile-','')}','${unit}')">${esc(item)}</button>`;
+      const isSel = !!(fp[section]||[]).find(x => getName(x) === item);
+      return `<button class="act-pick${isSel?' sel':''}" onclick="toggleFeedPick(this,'${section}','${unit}')">${esc(item)}</button>`;
     }).join('');
-    renderAmounts(id.replace('feedProfile-',''), unit);
+    renderAmounts(section, unit);
   };
 
-  buildGrid('feedProfile-hay',         HAY_TYPES,     fp.hay||[],         'kg');
-  buildGrid('feedProfile-compounds',   COMPOUND_FEEDS, fp.compounds||[],  'kg');
-  buildGrid('feedProfile-supplements', SUPPLEMENTS,    fp.supplements||[], 'g');
+  buildGrid('feedProfile-hay',         'hay',         HAY_TYPES,      'kg');
+  buildGrid('feedProfile-compounds',   'compounds',   COMPOUND_FEEDS, 'L');
+  buildGrid('feedProfile-supplements', 'supplements', SUPPLEMENTS,    'g');
 
   openModal('feedProfileModal');
 }
 
-function renderAmounts(section, unit) {
+function _readAmountsContainer(section) {
+  const vals = {};
+  document.querySelectorAll('#feedProfile-' + section + '-amounts [data-key]').forEach(el => { vals[el.dataset.key] = el.value; });
+  return vals;
+}
+
+function renderAmounts(section, defaultUnit) {
   const container = document.getElementById('feedProfile-' + section + '-amounts');
-  const existing = {};
-  container.querySelectorAll('[data-item]').forEach(inp => { existing[inp.dataset.item] = inp.value; });
+  const prev = _readAmountsContainer(section);
   const selected = [...document.querySelectorAll('#feedProfile-' + section + ' .act-pick.sel')];
   if (!selected.length) { container.innerHTML = ''; return; }
-  container.innerHTML = '<div style="margin-bottom:12px;">' + selected.map(btn => {
+  const isCompound = section === 'compounds';
+
+  container.innerHTML = selected.map(btn => {
     const name = btn.textContent;
-    const val = name in existing ? existing[name] : (btn.dataset.amount || '');
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <span style="flex:1;font-size:13px;">${esc(name)}</span>
-      <input class="modal-input" type="number" data-item="${esc(name)}" value="${val}"
-        inputmode="decimal" placeholder="0"
-        style="width:72px;margin:0;padding:6px 8px;font-size:14px;text-align:right;">
-      <span style="font-size:12px;color:var(--ink2);min-width:18px;">${unit}</span>
+    const stored = _fpStored[section+'/'+name] || {};
+    const get = sfx => prev[name+'_'+sfx] !== undefined ? prev[name+'_'+sfx]
+      : (sfx==='b' ? stored.breakfast : sfx==='l' ? stored.lunch : sfx==='d' ? stored.dinner : stored.unit) || '';
+    const u = prev[name+'_u'] !== undefined ? prev[name+'_u'] : (stored.unit || defaultUnit);
+
+    const unitRow = isCompound ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+      <span style="font-size:11px;color:var(--ink3);">Unit:</span>
+      <button type="button" class="unit-btn${u==='L'?' ut-sel':''}" onclick="switchFeedUnit(this,'${section}')">L</button>
+      <button type="button" class="unit-btn${u==='kg'?' ut-sel':''}" onclick="switchFeedUnit(this,'${section}')">kg</button>
+      <input type="hidden" data-key="${name}_u" value="${u}">
+    </div>` : '';
+
+    const uLabel = isCompound ? u : defaultUnit;
+    return `<div class="feed-item-block">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${esc(name)}</div>
+      ${unitRow}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        ${[['Breakfast','b'],['Lunch','l'],['Dinner','d']].map(([label,sfx]) => `
+          <div>
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:3px;">${label}</div>
+            <div style="display:flex;align-items:center;gap:2px;">
+              <input class="modal-input" type="number" data-key="${name}_${sfx}" value="${get(sfx)}"
+                inputmode="decimal" placeholder="—"
+                style="margin:0;padding:5px 4px;font-size:13px;text-align:right;min-width:0;">
+              <span class="feed-unit-lbl" style="font-size:10px;color:var(--ink3);flex-shrink:0;">${uLabel}</span>
+            </div>
+          </div>`).join('')}
+      </div>
     </div>`;
-  }).join('') + '</div>';
+  }).join('');
+}
+
+function switchFeedUnit(btn, section) {
+  const newUnit = btn.textContent.trim();
+  const block = btn.closest('.feed-item-block');
+  block.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('ut-sel', b.textContent.trim() === newUnit));
+  block.querySelectorAll('.feed-unit-lbl').forEach(s => s.textContent = newUnit);
+  block.querySelector('[data-key$="_u"]').value = newUnit;
 }
 
 function toggleFeedPick(btn, section, unit) {
@@ -1206,13 +1265,14 @@ function toggleFeedPick(btn, section, unit) {
 
 function saveFeedProfile() {
   const h = db.horses[_feedProfileHorseId];
-  if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[], hay:[]};
-  ['hay','compounds','supplements'].forEach((section, i) => {
-    const unit = ['kg','kg','g'][i];
+  if (!h.feedProfile) h.feedProfile = {hay:[], compounds:[], supplements:[]};
+  ['hay','compounds','supplements'].forEach(section => {
+    const vals = _readAmountsContainer(section);
     h.feedProfile[section] = [...document.querySelectorAll('#feedProfile-' + section + ' .act-pick.sel')].map(btn => {
       const name = btn.textContent;
-      const inp = document.querySelector('#feedProfile-' + section + '-amounts [data-item="' + name.replace(/"/g,'&quot;') + '"]');
-      return { name, amount: inp ? inp.value : '' };
+      const r = {name, breakfast:vals[name+'_b']||'', lunch:vals[name+'_l']||'', dinner:vals[name+'_d']||''};
+      if (section === 'compounds') r.unit = vals[name+'_u'] || 'L';
+      return r;
     });
   });
   saveData();
