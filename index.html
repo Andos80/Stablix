@@ -614,6 +614,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <label class="modal-label">Last visit</label>
     <input class="modal-input" type="date" id="dent-date-input">
     <input class="modal-input" type="text" id="dent-treatment-input" placeholder="Treatment (optional)">
+    <textarea class="modal-input" id="dent-note-input" placeholder="Note (optional)" rows="3" style="resize:none;"></textarea>
     <input class="modal-input" type="text" id="dent-name-input" placeholder="Dentist name (optional)">
     <label class="modal-label">Next appointment (optional)</label>
     <input class="modal-input" type="date" id="dent-next-input">
@@ -1135,6 +1136,7 @@ function renderHorseHealth(id) {
     <div class="card"><div class="info-list">
       <div class="info-row"><span class="info-key">Last</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
       ${de.treatment?`<div class="info-row"><span class="info-key">Treatment</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
+      ${de.note?`<div class="info-row"><span class="info-key">Note</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
       ${de.dentist?`<div class="info-row"><span class="info-key">Dentist</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
       ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
     </div></div>`;
@@ -1468,6 +1470,7 @@ function renderDentist() {
       <div class="info-list">
         <div class="info-row"><span class="info-key">Last visit</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
         ${de.treatment?`<div class="info-row"><span class="info-key">Treatment</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
+        ${de.note?`<div class="info-row"><span class="info-key">Note</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
         ${de.dentist?`<div class="info-row"><span class="info-key">Dentist</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
         ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
       </div>
@@ -2077,6 +2080,7 @@ function openDentistModal(horseId) {
   const de = horseId ? (db.horses[horseId]?.dent || {}) : {};
   document.getElementById('dent-date-input').value = de.lastDate ? dmyToIso(de.lastDate) : '';
   document.getElementById('dent-treatment-input').value = de.treatment || '';
+  document.getElementById('dent-note-input').value = de.note || '';
   document.getElementById('dent-name-input').value = de.dentist || '';
   document.getElementById('dent-next-input').value = de.nextDate ? dmyToIso(de.nextDate) : '';
   openModal('dentModal');
@@ -2087,6 +2091,7 @@ function confirmDentist() {
   updateDentist(horseId, {
     lastDate:  isoToDmy(document.getElementById('dent-date-input').value),
     treatment: document.getElementById('dent-treatment-input').value.trim(),
+    note:      document.getElementById('dent-note-input').value.trim(),
     dentist:   document.getElementById('dent-name-input').value.trim(),
     nextDate:  isoToDmy(document.getElementById('dent-next-input').value)
   });
