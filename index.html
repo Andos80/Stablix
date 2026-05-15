@@ -625,10 +625,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-title" id="feedProfile-title">Feed profile</div>
     <label class="modal-label">Hay</label>
     <div class="act-grid-2" id="feedProfile-hay"></div>
+    <div id="feedProfile-hay-amounts"></div>
     <label class="modal-label">Compound feed</label>
     <div class="act-grid-2" id="feedProfile-compounds"></div>
+    <div id="feedProfile-compounds-amounts"></div>
     <label class="modal-label">Supplements</label>
     <div class="act-grid" id="feedProfile-supplements"></div>
+    <div id="feedProfile-supplements-amounts"></div>
     <button class="modal-confirm" onclick="saveFeedProfile()">Save</button>
   </div>
 </div>
@@ -724,6 +727,11 @@ function loadData() {
       if (!h.files) { h.files = []; dirty = true; }
       if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[], hay:[]}; dirty = true; }
       else if (!h.feedProfile.hay) { h.feedProfile.hay = []; dirty = true; }
+      ['hay','compounds','supplements'].forEach(k => {
+        if (h.feedProfile[k]?.length && typeof h.feedProfile[k][0] === 'string') {
+          h.feedProfile[k] = h.feedProfile[k].map(name => ({name, amount:''})); dirty = true;
+        }
+      });
     });
     if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
     if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
@@ -1128,9 +1136,11 @@ function renderFeedingOverview() {
   const horseRows = horses.length
     ? horses.map(h => {
         const fp = h.feedProfile || {compounds:[], supplements:[], hay:[]};
-        const hTags = (fp.hay||[]).map(h => `<span class="feed-tag" style="background:#fef9c3;color:#854d0e;">${esc(h)}</span>`).join('');
-        const cTags = fp.compounds.map(c => `<span class="feed-tag">${esc(c)}</span>`).join('');
-        const sTags = fp.supplements.map(s => `<span class="feed-tag feed-tag-supp">${esc(s)}</span>`).join('');
+        const _n = x => typeof x === 'string' ? x : x.name;
+        const _a = (x, u) => (typeof x === 'object' && x.amount) ? ` · ${x.amount}${u}` : '';
+        const hTags = (fp.hay||[]).map(x => `<span class="feed-tag" style="background:#fef9c3;color:#854d0e;">${esc(_n(x))}${_a(x,'kg')}</span>`).join('');
+        const cTags = fp.compounds.map(x => `<span class="feed-tag">${esc(_n(x))}${_a(x,'kg')}</span>`).join('');
+        const sTags = fp.supplements.map(x => `<span class="feed-tag feed-tag-supp">${esc(_n(x))}${_a(x,'g')}</span>`).join('');
         const tags = hTags + cTags + sTags || `<span style="font-size:12px;color:var(--ink3);">Nothing selected</span>`;
         return `<div class="feed-horse-row" onclick="openFeedProfile('${h.id}')">
           <div class="feed-horse-row-name">${esc(h.name)}</div>
@@ -1150,26 +1160,61 @@ function openFeedProfile(horseId) {
   _feedProfileHorseId = horseId;
   const h = db.horses[horseId];
   document.getElementById('feedProfile-title').textContent = h.name;
-  const fp = h.feedProfile || {compounds:[], supplements:[]};
+  const fp = h.feedProfile || {compounds:[], supplements:[], hay:[]};
+  const getName = x => typeof x === 'string' ? x : x.name;
+  const getAmt  = x => typeof x === 'object' ? (x.amount || '') : '';
 
-  document.getElementById('feedProfile-hay').innerHTML =
-    HAY_TYPES.map(h => `<button class="act-pick${fp.hay.includes(h)?' sel':''}" onclick="toggleFeedPick(this)">${esc(h)}</button>`).join('');
+  const buildGrid = (id, list, items, unit) => {
+    document.getElementById(id).innerHTML = list.map(item => {
+      const stored = items.find(x => getName(x) === item);
+      const amt = stored ? getAmt(stored) : '';
+      return `<button class="act-pick${stored?' sel':''}" data-amount="${amt}" onclick="toggleFeedPick(this,'${id.replace('feedProfile-','')}','${unit}')">${esc(item)}</button>`;
+    }).join('');
+    renderAmounts(id.replace('feedProfile-',''), unit);
+  };
 
-  document.getElementById('feedProfile-compounds').innerHTML =
-    COMPOUND_FEEDS.map(f => `<button class="act-pick${fp.compounds.includes(f)?' sel':''}" onclick="toggleFeedPick(this)">${esc(f)}</button>`).join('');
-
-  document.getElementById('feedProfile-supplements').innerHTML =
-    SUPPLEMENTS.map(s => `<button class="act-pick${fp.supplements.includes(s)?' sel':''}" onclick="toggleFeedPick(this)">${esc(s)}</button>`).join('');
+  buildGrid('feedProfile-hay',         HAY_TYPES,     fp.hay||[],         'kg');
+  buildGrid('feedProfile-compounds',   COMPOUND_FEEDS, fp.compounds||[],  'kg');
+  buildGrid('feedProfile-supplements', SUPPLEMENTS,    fp.supplements||[], 'g');
 
   openModal('feedProfileModal');
 }
-function toggleFeedPick(btn) { btn.classList.toggle('sel'); }
+
+function renderAmounts(section, unit) {
+  const container = document.getElementById('feedProfile-' + section + '-amounts');
+  const existing = {};
+  container.querySelectorAll('[data-item]').forEach(inp => { existing[inp.dataset.item] = inp.value; });
+  const selected = [...document.querySelectorAll('#feedProfile-' + section + ' .act-pick.sel')];
+  if (!selected.length) { container.innerHTML = ''; return; }
+  container.innerHTML = '<div style="margin-bottom:12px;">' + selected.map(btn => {
+    const name = btn.textContent;
+    const val = name in existing ? existing[name] : (btn.dataset.amount || '');
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="flex:1;font-size:13px;">${esc(name)}</span>
+      <input class="modal-input" type="number" data-item="${esc(name)}" value="${val}"
+        inputmode="decimal" placeholder="0"
+        style="width:72px;margin:0;padding:6px 8px;font-size:14px;text-align:right;">
+      <span style="font-size:12px;color:var(--ink2);min-width:18px;">${unit}</span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function toggleFeedPick(btn, section, unit) {
+  btn.classList.toggle('sel');
+  renderAmounts(section, unit);
+}
+
 function saveFeedProfile() {
   const h = db.horses[_feedProfileHorseId];
-  if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[]};
-  h.feedProfile.hay = [...document.querySelectorAll('#feedProfile-hay .act-pick.sel')].map(b => b.textContent);
-  h.feedProfile.compounds = [...document.querySelectorAll('#feedProfile-compounds .act-pick.sel')].map(b => b.textContent);
-  h.feedProfile.supplements = [...document.querySelectorAll('#feedProfile-supplements .act-pick.sel')].map(b => b.textContent);
+  if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[], hay:[]};
+  ['hay','compounds','supplements'].forEach((section, i) => {
+    const unit = ['kg','kg','g'][i];
+    h.feedProfile[section] = [...document.querySelectorAll('#feedProfile-' + section + ' .act-pick.sel')].map(btn => {
+      const name = btn.textContent;
+      const inp = document.querySelector('#feedProfile-' + section + '-amounts [data-item="' + name.replace(/"/g,'&quot;') + '"]');
+      return { name, amount: inp ? inp.value : '' };
+    });
+  });
   saveData();
   closeModal('feedProfileModal');
   renderFeedingOverview();
