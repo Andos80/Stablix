@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Stablix">
 <meta name="theme-color" content="#2C4A2E">
+<link rel="apple-touch-icon" id="pwa-icon">
 <title>Stablix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -2194,6 +2195,35 @@ function handleImport(input) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 
 renderHorseList();
+
+// ─── PWA icon ─────────────────────────────────────────────────────────────────
+(function(){
+  const c = document.createElement('canvas');
+  c.width = c.height = 180;
+  const ctx = c.getContext('2d');
+  // Background
+  ctx.fillStyle = '#2C4A2E';
+  ctx.fillRect(0, 0, 180, 180);
+  // Octagon
+  ctx.beginPath();
+  const R = 74, CX = 90, CY = 90;
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4 - Math.PI / 8;
+    const x = CX + R * Math.cos(a), y = CY + R * Math.sin(a);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 7;
+  ctx.stroke();
+  // S
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 96px "DM Serif Display", Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('S', 90, 94);
+  document.getElementById('pwa-icon').href = c.toDataURL('image/png');
+})();
 </script>
 </body>
 </html>
