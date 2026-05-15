@@ -623,6 +623,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="feedProfile-title">Feed profile</div>
+    <label class="modal-label">Hay</label>
+    <div class="act-grid-2" id="feedProfile-hay"></div>
     <label class="modal-label">Compound feed</label>
     <div class="act-grid-2" id="feedProfile-compounds"></div>
     <label class="modal-label">Supplements</label>
@@ -649,6 +651,7 @@ const STORAGE_KEY = 'stablix_v1';
 
 const COMPOUND_FEEDS = ['High Fibre Cubes (L)','High Fibre Mix (L)','Top Line Conditioning Mix (L)','Ease & Excel Cubes (L)','Fibre Beet (L)','Outshine (Cup)','Competition Mix (L)','Senior Mix (L)','Keep Calm (L)','Balancer (Cup)','Alfa Alfa Plus Oil','Golden Grass','Ultra Grass'];
 const SUPPLEMENTS   = ['Electrolytes','Muscle Relax','Relax','Relax Pro','Hemachol','Immunotop','Respitop','P-block','Lacta-Fort','Top Competition','Energy Gel','Gastryl','Gastro Care+','Pro Motion','Muscle Care','Arti-Gold','Arti-Sport'];
+const HAY_TYPES     = ['Grass hay','Haylage'];
 
 const SEED = {
   horses: {
@@ -719,7 +722,8 @@ function loadData() {
     Object.values(d.horses).forEach(h => {
       (h.vac?.records||[]).forEach(r => { if (!r.id) { r.id = 'vr_'+(++vri); dirty = true; } });
       if (!h.files) { h.files = []; dirty = true; }
-      if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[]}; dirty = true; }
+      if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[], hay:[]}; dirty = true; }
+      else if (!h.feedProfile.hay) { h.feedProfile.hay = []; dirty = true; }
     });
     if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
     if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
@@ -747,7 +751,7 @@ let db = loadData();
 
 function addHorse(data) {
   const id = 'h_' + Date.now();
-  db.horses[id] = { id, ...data, farrier:{}, vac:{records:[]}, dent:{}, feeding:{breakfast:[],lunch:[],dinner:[]}, feedProfile:{compounds:[],supplements:[]}, activities:[], costs:[], notes:[] };
+  db.horses[id] = { id, ...data, farrier:{}, vac:{records:[]}, dent:{}, feeding:{breakfast:[],lunch:[],dinner:[]}, feedProfile:{compounds:[],supplements:[],hay:[]}, activities:[], costs:[], notes:[] };
   saveData();
   return id;
 }
@@ -1123,10 +1127,11 @@ function renderFeedingOverview() {
   const horses = Object.values(db.horses);
   const horseRows = horses.length
     ? horses.map(h => {
-        const fp = h.feedProfile || {compounds:[], supplements:[]};
+        const fp = h.feedProfile || {compounds:[], supplements:[], hay:[]};
+        const hTags = (fp.hay||[]).map(h => `<span class="feed-tag" style="background:#fef9c3;color:#854d0e;">${esc(h)}</span>`).join('');
         const cTags = fp.compounds.map(c => `<span class="feed-tag">${esc(c)}</span>`).join('');
         const sTags = fp.supplements.map(s => `<span class="feed-tag feed-tag-supp">${esc(s)}</span>`).join('');
-        const tags = cTags + sTags || `<span style="font-size:12px;color:var(--ink3);">Nothing selected</span>`;
+        const tags = hTags + cTags + sTags || `<span style="font-size:12px;color:var(--ink3);">Nothing selected</span>`;
         return `<div class="feed-horse-row" onclick="openFeedProfile('${h.id}')">
           <div class="feed-horse-row-name">${esc(h.name)}</div>
           <div class="feed-tags">${tags}</div>
@@ -1147,6 +1152,9 @@ function openFeedProfile(horseId) {
   document.getElementById('feedProfile-title').textContent = h.name;
   const fp = h.feedProfile || {compounds:[], supplements:[]};
 
+  document.getElementById('feedProfile-hay').innerHTML =
+    HAY_TYPES.map(h => `<button class="act-pick${fp.hay.includes(h)?' sel':''}" onclick="toggleFeedPick(this)">${esc(h)}</button>`).join('');
+
   document.getElementById('feedProfile-compounds').innerHTML =
     COMPOUND_FEEDS.map(f => `<button class="act-pick${fp.compounds.includes(f)?' sel':''}" onclick="toggleFeedPick(this)">${esc(f)}</button>`).join('');
 
@@ -1159,6 +1167,7 @@ function toggleFeedPick(btn) { btn.classList.toggle('sel'); }
 function saveFeedProfile() {
   const h = db.horses[_feedProfileHorseId];
   if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[]};
+  h.feedProfile.hay = [...document.querySelectorAll('#feedProfile-hay .act-pick.sel')].map(b => b.textContent);
   h.feedProfile.compounds = [...document.querySelectorAll('#feedProfile-compounds .act-pick.sel')].map(b => b.textContent);
   h.feedProfile.supplements = [...document.querySelectorAll('#feedProfile-supplements .act-pick.sel')].map(b => b.textContent);
   saveData();
