@@ -11,6 +11,7 @@
 <title>Stablix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg: #F7F5F0;
@@ -250,10 +251,62 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 .add-inline-btn { background: none; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--accent); font-size: 12px; font-weight: 500; padding: 4px 10px; cursor: pointer; font-family: var(--font-body); }
 .add-inline-btn:active { background: var(--accent-light); }
 .modal-label { font-size: 12px; color: var(--ink2); margin-bottom: 4px; display: block; margin-top: 2px; }
+
+/* ─── Auth screens ────────────────────────────────────────────────────────── */
+#loading-screen { position:fixed;inset:0;background:var(--accent);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px; }
+.loading-logo { font-family:var(--font-display);font-size:38px;color:#fff; }
+.loading-dot { display:inline-block;width:9px;height:9px;background:rgba(255,255,255,0.8);border-radius:50%;margin:0 4px;animation:ldot 1.4s ease-in-out infinite; }
+.loading-dot:nth-child(2){animation-delay:.2s}.loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+#login-screen,#pending-screen { position:fixed;inset:0;background:var(--accent);display:flex;align-items:center;justify-content:center;z-index:9998;padding:24px; }
+.auth-card { background:var(--surface);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px; }
+.auth-logo { font-family:var(--font-display);font-size:28px;color:var(--accent);text-align:center;margin-bottom:4px; }
+.auth-sub { font-size:13px;color:var(--ink2);text-align:center;margin-bottom:24px; }
+.auth-tabs { display:flex;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden; }
+.auth-tab { flex:1;padding:10px;font-size:14px;font-weight:500;font-family:var(--font-body);border:none;background:transparent;cursor:pointer;color:var(--ink2);-webkit-appearance:none; }
+.auth-tab.active { background:var(--accent);color:#fff; }
+.auth-error { background:var(--danger-light);color:var(--danger);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;margin-bottom:12px; }
+.auth-msg { background:var(--ok-light);color:var(--ok);border-radius:var(--radius-sm);padding:12px;font-size:13px;text-align:center;margin-top:20px; }
 </style>
 </head>
 <body>
-<div id="app">
+
+<div id="loading-screen">
+  <div class="loading-logo">Stablix</div>
+  <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+</div>
+
+<div id="login-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">Stablix</div>
+    <div class="auth-sub">Stable management</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Sign in</button>
+      <button class="auth-tab" id="tab-signup" onclick="showAuthTab('signup')">Sign up</button>
+    </div>
+    <div id="auth-error" class="auth-error" style="display:none"></div>
+    <div id="form-login">
+      <input class="modal-input" type="email" id="l-email" placeholder="Email" autocomplete="email">
+      <input class="modal-input" type="password" id="l-pass" placeholder="Password" autocomplete="current-password">
+      <button class="modal-confirm" onclick="doLogin()">Sign in</button>
+    </div>
+    <div id="form-signup" style="display:none">
+      <input class="modal-input" type="email" id="s-email" placeholder="Email" autocomplete="email">
+      <input class="modal-input" type="password" id="s-pass" placeholder="Password (min 6 characters)" autocomplete="new-password">
+      <button class="modal-confirm" onclick="doSignup()">Create account</button>
+    </div>
+  </div>
+</div>
+
+<div id="pending-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">Stablix</div>
+    <div class="auth-msg">Your account is waiting for approval from the stable admin.</div>
+    <button class="modal-confirm" style="background:var(--surface2);color:var(--ink);border:1px solid var(--border);margin-top:12px;" onclick="doLogout()">Sign out</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
 
   <header class="topbar">
     <div class="topbar-inner">
@@ -467,6 +520,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <div id="files-overview"></div>
     </div>
 
+    <!-- USERS (admin) -->
+    <div class="page" id="pg-users">
+      <div class="page-heading">Users</div>
+      <div id="users-list"></div>
+    </div>
+
   </main>
 
   <nav class="bottom-nav">
@@ -491,9 +550,11 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <button class="nav-item" onclick="navTo('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding plan</button>
     <button class="nav-item" onclick="navTo('costs','Costs')"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
     <button class="nav-item" onclick="navTo('files','Files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
+    <button class="nav-item" id="nav-users-btn" style="display:none" onclick="navTo('users','Users')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</button>
     <div class="nav-divider"></div>
     <button class="nav-item" onclick="exportData();closeNav()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>Export data</button>
     <button class="nav-item" onclick="importData()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>Import data</button>
+    <button class="nav-item" onclick="doLogout();closeNav()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</button>
   </div>
 </div>
 
@@ -706,9 +767,16 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 </div>
 
 <script>
-// ─── Data layer ───────────────────────────────────────────────────────────────
+// ─── Supabase ─────────────────────────────────────────────────────────────────
+const { createClient } = supabase;
+const _sb = createClient(
+  'https://ijdyzbfybvewhxprnlgl.supabase.co',
+  'sb_publishable_zhxEEvDSGIUG1iv6vFL8EA_PEVvPD-y'
+);
+let currentUser = null;
+let currentProfile = null;
 
-const STORAGE_KEY = 'stablix_v1';
+// ─── Data layer ───────────────────────────────────────────────────────────────
 
 const CAL_COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#795548','#607d8b'];
 
@@ -775,58 +843,47 @@ const SEED = {
   ]
 };
 
-function loadData() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    const d = JSON.parse(raw);
-    let dirty = false;
-    if (!d.events) { d.events = JSON.parse(JSON.stringify(SEED.events)); dirty = true; }
-    let vri = 0;
-    Object.values(d.horses).forEach(h => {
-      (h.vac?.records||[]).forEach(r => { if (!r.id) { r.id = 'vr_'+(++vri); dirty = true; } });
-      if (!h.files) { h.files = []; dirty = true; }
-      if (!h.feedProfile) { h.feedProfile = {compounds:[], supplements:[], hay:[]}; dirty = true; }
-      else if (!h.feedProfile.hay) { h.feedProfile.hay = []; dirty = true; }
-      ['hay','compounds','supplements'].forEach(k => {
-        if (!h.feedProfile[k]) { h.feedProfile[k] = []; dirty = true; return; }
-        h.feedProfile[k] = h.feedProfile[k].map(item => {
-          if (typeof item === 'string') { dirty = true; return {name:item, breakfast:'', lunch:'', dinner:''}; }
-          if (!('breakfast' in item)) {
-            dirty = true;
-            const r = {name:item.name, breakfast:item.amount||'', lunch:'', dinner:''};
-            if (k === 'compounds') r.unit = item.unit||'L';
-            return r;
-          }
-          if (k === 'compounds' && !item.unit) { dirty = true; return {...item, unit:'L'}; }
-          return item;
-        });
+function runMigrations(d) {
+  if (!d.events) d.events = JSON.parse(JSON.stringify(SEED.events));
+  let vri = 0;
+  Object.values(d.horses).forEach(h => {
+    (h.vac?.records||[]).forEach(r => { if (!r.id) r.id = 'vr_'+(++vri); });
+    if (!h.files) h.files = [];
+    if (!h.feedProfile) h.feedProfile = {compounds:[], supplements:[], hay:[]};
+    else if (!h.feedProfile.hay) h.feedProfile.hay = [];
+    ['hay','compounds','supplements'].forEach(k => {
+      if (!h.feedProfile[k]) { h.feedProfile[k] = []; return; }
+      h.feedProfile[k] = h.feedProfile[k].map(item => {
+        if (typeof item === 'string') return {name:item, breakfast:'', lunch:'', dinner:''};
+        if (!('breakfast' in item)) {
+          const r = {name:item.name, breakfast:item.amount||'', lunch:'', dinner:''};
+          if (k === 'compounds') r.unit = item.unit||'L';
+          return r;
+        }
+        if (k === 'compounds' && !item.unit) return {...item, unit:'L'};
+        return item;
       });
     });
-    if (!d.mealTimes) { d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'}; dirty = true; }
-    let _ci = 0;
-    Object.values(d.horses).forEach(h => { if (!h.calColor) { h.calColor = CAL_COLORS[_ci % CAL_COLORS.length]; _ci++; dirty = true; } });
-    if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
-    return d;
-  }
-  const seed = JSON.parse(JSON.stringify(SEED));
-  let vri = 0;
-  Object.values(seed.horses).forEach(h => {
-    (h.vac?.records||[]).forEach(r => { r.id = 'vr_'+(++vri); });
-    h.files = [];
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-  return seed;
+  if (!d.mealTimes) d.mealTimes = {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
+  let _ci = 0;
+  Object.values(d.horses).forEach(h => { if (!h.calColor) { h.calColor = CAL_COLORS[_ci % CAL_COLORS.length]; _ci++; } });
+  return d;
+}
+async function loadData() {
+  const { data, error } = await _sb.from('stable_data').select('data').eq('id', 1).single();
+  if (error || !data) return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
+  return runMigrations(data.data);
 }
 function saveData() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-  } catch(e) {
-    alert('Storage is full. Delete some files or photos to free up space.');
-    throw e;
-  }
+  if (!currentUser) return;
+  _sb.from('stable_data')
+    .update({ data: db, updated_at: new Date().toISOString(), updated_by: currentUser.id })
+    .eq('id', 1)
+    .then(({ error }) => { if (error) console.error('Save failed:', error.message); });
 }
 
-let db = loadData();
+let db = {};
 
 function addHorse(data) {
   const id = 'h_' + Date.now();
@@ -982,6 +1039,7 @@ function bNav(page, title) {
   if (page === 'dentist') renderDentist();
   if (page === 'costs') renderCostOverview();
   if (page === 'feeding') renderFeedingOverview();
+  if (page === 'users') renderUsers();
 }
 
 function openNav() { document.getElementById('navOverlay').classList.add('open'); }
@@ -2180,7 +2238,7 @@ function handleImport(input) {
       if (!data.horses) throw new Error('Not a Stablix backup');
       if (!confirm('This will replace all your current data with the backup. Continue?')) return;
       db = data;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      saveData();
       closeNav();
       bNav('home', 'Stablix');
       alert('Import successful! All your data has been restored.');
@@ -2192,9 +2250,139 @@ function handleImport(input) {
   input.value = '';
 }
 
-// ─── Boot ─────────────────────────────────────────────────────────────────────
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 
-renderHorseList();
+function showAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  if (!email || !pass) { showAuthError('Please enter email and password.'); return; }
+  const btn = document.querySelector('#form-login .modal-confirm');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+  const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Sign in'; btn.disabled = false;
+  if (error) showAuthError(error.message);
+}
+
+async function doSignup() {
+  const email = document.getElementById('s-email').value.trim();
+  const pass = document.getElementById('s-pass').value;
+  if (!email || !pass) { showAuthError('Please enter email and password.'); return; }
+  if (pass.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  const btn = document.querySelector('#form-signup .modal-confirm');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  const { data, error } = await _sb.auth.signUp({ email, password: pass });
+  btn.textContent = 'Create account'; btn.disabled = false;
+  if (error) { showAuthError(error.message); return; }
+  if (!data.session) {
+    document.getElementById('form-signup').innerHTML = '<div class="auth-msg">Account created! Ask the admin to approve your access, then sign in.</div>';
+    document.getElementById('auth-error').style.display = 'none';
+  }
+}
+
+async function doLogout() {
+  await _sb.auth.signOut();
+}
+
+function showLoginScreen() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = '';
+}
+
+function showPendingScreen() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pending-screen').style.display = '';
+}
+
+async function showApp() {
+  db = await loadData();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  document.getElementById('nav-users-btn').style.display = currentProfile?.role === 'admin' ? '' : 'none';
+  renderHorseList();
+}
+
+_sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'INITIAL_SESSION') {
+    if (session) {
+      currentUser = session.user;
+      const { data: profile } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
+      currentProfile = profile;
+      if (!profile || profile.role === 'pending') { showPendingScreen(); return; }
+      await showApp();
+    } else {
+      showLoginScreen();
+    }
+  } else if (event === 'SIGNED_IN') {
+    currentUser = session.user;
+    const { data: profile } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
+    currentProfile = profile;
+    if (!profile || profile.role === 'pending') { showPendingScreen(); return; }
+    if (document.getElementById('app').style.display === 'none') await showApp();
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentProfile = null;
+    db = {};
+    showLoginScreen();
+  }
+});
+
+// ─── Users (admin) ────────────────────────────────────────────────────────────
+
+async function renderUsers() {
+  const list = document.getElementById('users-list');
+  list.innerHTML = '<p class="empty-state" style="padding:8px 0;">Loading…</p>';
+  const { data: users, error } = await _sb.from('profiles').select('*').order('created_at');
+  if (error || !users?.length) { list.innerHTML = '<p class="empty-state">No users found.</p>'; return; }
+  list.innerHTML = users.map(u => {
+    const isMe = u.id === currentUser?.id;
+    const roleLabel = u.role === 'admin' ? 'Admin' : u.role === 'member' ? 'Member' : 'Pending';
+    const rolePill = u.role === 'admin' ? 'pill-ok' : u.role === 'member' ? 'pill-warn' : 'pill-danger';
+    let btns = '';
+    if (!isMe && currentProfile?.role === 'admin') {
+      if (u.role === 'pending') {
+        btns = `<button class="detail-quick-btn" style="background:var(--ok-light);color:var(--ok);border-color:var(--ok-light);padding:8px 16px;" onclick="setUserRole('${u.id}','member')">Approve</button>`;
+      } else if (u.role === 'member') {
+        btns = `<button class="detail-quick-btn" style="background:var(--accent-light);color:var(--accent);border-color:var(--accent-light);padding:8px 12px;margin-right:6px;" onclick="setUserRole('${u.id}','admin')">Make admin</button>`
+             + `<button class="detail-quick-btn" style="background:var(--danger-light);color:var(--danger);border-color:var(--danger-light);padding:8px 12px;" onclick="setUserRole('${u.id}','pending')">Remove</button>`;
+      }
+    }
+    return `<div class="card"><div style="padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${btns?'10px':'0'};">
+        <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${esc(u.email)}</div>${isMe?'<div style="font-size:12px;color:var(--ink3);">You</div>':''}</div>
+        <span class="pill ${rolePill}">${roleLabel}</span>
+      </div>${btns?`<div style="display:flex;gap:6px;">${btns}</div>`:''}
+    </div></div>`;
+  }).join('');
+}
+
+async function setUserRole(userId, role) {
+  const { error } = await _sb.rpc('set_user_role', { target_user_id: userId, new_role: role });
+  if (error) { alert('Failed: ' + error.message); return; }
+  renderUsers();
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+// Handled by _sb.auth.onAuthStateChange INITIAL_SESSION above
 
 // ─── PWA icon ─────────────────────────────────────────────────────────────────
 (function(){
