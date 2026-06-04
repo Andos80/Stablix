@@ -1,43 +1,42 @@
 # Stablix
 
-A mobile-first stable management app built as a single HTML file — no frameworks, no build step, no dependencies beyond Google Fonts.
+A mobile-first stable management app built as a single HTML file — no frameworks, no build step.
+
+**Live:** https://andos80.github.io/Stablix
 
 ## What it does
 
 Stablix helps you track everything that matters for a small stable:
 
-- **Horses** — profile cards with breed, lineage, and colour; quick-access to health, activities, files, and feeding plan per horse
-- **Activities** — log training sessions, vet checks, and treatments (flatwork, jumping, hacking, shows, massage, walker, pole work, treadmill)
-- **Health** — vaccination, farrier, and dentist records with status pills (ok / warn / danger) and next-appointment dates
-- **Calendar** — upcoming events across all horses in a chronological list
-- **Feeding plan** — per-horse meal plans for breakfast, lunch, and dinner
-- **Files & Album** — photo albums and documents (passport, vaccination card, vet reports, insurance) per horse
+- **Horses** — profile cards with breed, lineage, coat colour, and photo; per-horse health, activities, files, and feeding plan
+- **Activities** — log training sessions, vet checks, and treatments (flatwork, jumping, hacking, shows, massage, and more)
+- **Health** — vaccination, farrier, and dentist records with status indicators and next-appointment dates
+- **Calendar** — monthly grid with per-horse colour bars; add and manage events
+- **Feeding plan** — per-horse meal plans for breakfast, lunch, and dinner with hay, compound feeds, and supplements
+- **Costs** — expense tracking per horse with category breakdown
+- **Notes** — journal per horse
+- **Files** — photos, videos, and documents per horse
 
-## How to use
+## Multi-user
 
-Open `index.html` in any modern browser. No server or installation required.
+Stablix uses Supabase for authentication and cloud storage:
 
-The app is optimised for mobile — add it to your home screen on iOS or Android for a native-app feel (full-screen, no browser chrome).
-
-## Navigation
-
-- **Bottom bar** — quick access to Home, Calendar, Feeding plan, and Files
-- **Hamburger menu** — full section list via a slide-in drawer
-- **+ button** — opens the "Add activity" sheet from anywhere in the app
+- Each user logs in with email and password
+- Each user has their own separate horses and data
+- An admin approves who gets access (hamburger menu → Users)
+- All changes save automatically to the cloud
 
 ## Tech
 
 - Pure HTML / CSS / JavaScript — one self-contained file
+- Supabase — authentication and per-user cloud data storage
 - CSS custom properties for the full colour theme
-- Inline SVG icons
-- Google Fonts: DM Serif Display (headings) + DM Sans (body)
+- Inline SVG icons, Google Fonts (DM Serif Display + DM Sans)
 - `100dvh` layout, `safe-area-inset` padding — works correctly on iOS notch devices
+- PWA-ready — add to home screen on iOS or Android for a full-screen native feel
 
-## Horses in the demo data
+## Navigation
 
-| Name | Born | Breed |
-|------|------|-------|
-| Dinero de Laubry | 2003 | KWPN |
-| Bay Venture | 2014 | KWPN |
-| Saga de Moyon | 2018 | Selle Français |
-| Clinton III | 2011 | Hanoverian |
+- **Bottom bar** — Home, Calendar, Horses, Feeding plan
+- **Hamburger menu** — full section list, export/import, users (admin), sign out
+- **+ button** — context-sensitive add action from any screen
