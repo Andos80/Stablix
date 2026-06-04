@@ -871,15 +871,14 @@ function runMigrations(d) {
   return d;
 }
 async function loadData() {
-  const { data, error } = await _sb.from('stable_data').select('data').eq('id', 1).single();
+  const { data, error } = await _sb.from('stable_data').select('data').eq('user_id', currentUser.id).single();
   if (error || !data) return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
   return runMigrations(data.data);
 }
 function saveData() {
   if (!currentUser) return;
   _sb.from('stable_data')
-    .update({ data: db, updated_at: new Date().toISOString(), updated_by: currentUser.id })
-    .eq('id', 1)
+    .upsert({ user_id: currentUser.id, data: db, updated_at: new Date().toISOString() })
     .then(({ error }) => { if (error) console.error('Save failed:', error.message); });
 }
 
