@@ -301,8 +301,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 <div id="pending-screen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">Stablix</div>
-    <div class="auth-msg">Your account is waiting for approval from the stable admin.</div>
-    <button class="modal-confirm" style="background:var(--surface2);color:var(--ink);border:1px solid var(--border);margin-top:12px;" onclick="doLogout()">Sign out</button>
+    <div class="auth-sub">Create your own stable, or wait to be added to one.</div>
+    <input class="modal-input" type="text" id="stable-name-input" placeholder="Stable name">
+    <button class="modal-confirm" onclick="doCreateStable()">Create my stable</button>
+    <div style="text-align:center;font-size:13px;color:var(--ink3);margin:14px 0;">— or —</div>
+    <div class="auth-msg">Waiting for a stable owner to add you. Ask them to open the app and approve you in the Users screen.</div>
+    <button class="modal-confirm" style="background:var(--surface2);color:var(--ink);border:1px solid var(--border);margin-top:10px;" onclick="doCheckApproval()">Check for approval</button>
+    <button class="modal-confirm" style="background:transparent;color:var(--ink3);border:none;margin-top:4px;" onclick="doLogout()">Sign out</button>
   </div>
 </div>
 
@@ -871,14 +876,14 @@ function runMigrations(d) {
   return d;
 }
 async function loadData() {
-  const { data, error } = await _sb.from('stable_data').select('data').eq('user_id', currentUser.id).single();
+  const { data, error } = await _sb.from('stable_data').select('data').eq('stable_id', currentProfile.stable_id).single();
   if (error || !data) return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
   return runMigrations(data.data);
 }
 function saveData() {
-  if (!currentUser) return;
+  if (!currentUser || !currentProfile?.stable_id) return;
   _sb.from('stable_data')
-    .upsert({ user_id: currentUser.id, data: db, updated_at: new Date().toISOString() })
+    .upsert({ stable_id: currentProfile.stable_id, data: db, updated_at: new Date().toISOString() })
     .then(({ error }) => { if (error) console.error('Save failed:', error.message); });
 }
 
@@ -2316,7 +2321,7 @@ async function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pending-screen').style.display = 'none';
   document.getElementById('app').style.display = '';
-  document.getElementById('nav-users-btn').style.display = currentProfile?.role === 'admin' ? '' : 'none';
+  document.getElementById('nav-users-btn').style.display = currentProfile?.role === 'owner' ? '' : 'none';
   renderHorseList();
 }
 
@@ -2327,23 +2332,29 @@ setTimeout(() => {
   }
 }, 8000);
 
+async function loadProfile(userId) {
+  const { data } = await _sb.from('profiles').select('*').eq('id', userId).single();
+  return data;
+}
+
+async function handleSession(userId) {
+  const profile = await loadProfile(userId);
+  currentProfile = profile;
+  if (!profile || !profile.stable_id) { showPendingScreen(); return; }
+  await showApp();
+}
+
 _sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'INITIAL_SESSION') {
     if (session) {
       currentUser = session.user;
-      const { data: profile } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
-      currentProfile = profile;
-      if (!profile || profile.role === 'pending') { showPendingScreen(); return; }
-      await showApp();
+      await handleSession(session.user.id);
     } else {
       showLoginScreen();
     }
   } else if (event === 'SIGNED_IN') {
     currentUser = session.user;
-    const { data: profile } = await _sb.from('profiles').select('*').eq('id', session.user.id).single();
-    currentProfile = profile;
-    if (!profile || profile.role === 'pending') { showPendingScreen(); return; }
-    if (document.getElementById('app').style.display === 'none') await showApp();
+    if (document.getElementById('app').style.display === 'none') await handleSession(session.user.id);
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     currentProfile = null;
@@ -2352,37 +2363,78 @@ _sb.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-// ─── Users (admin) ────────────────────────────────────────────────────────────
+// ─── Users (owner) ────────────────────────────────────────────────────────────
+
+async function doCreateStable() {
+  const name = document.getElementById('stable-name-input').value.trim();
+  if (!name) { alert('Please enter a stable name.'); return; }
+  const btn = document.querySelector('#pending-screen .modal-confirm');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  const { error } = await _sb.rpc('create_stable', { stable_name: name });
+  btn.textContent = 'Create my stable'; btn.disabled = false;
+  if (error) { alert('Failed: ' + error.message); return; }
+  currentProfile = await loadProfile(currentUser.id);
+  await showApp();
+}
+
+async function doCheckApproval() {
+  currentProfile = await loadProfile(currentUser.id);
+  if (currentProfile?.stable_id) await showApp();
+  else alert('Not approved yet. Ask the stable owner to add you in their Users screen.');
+}
 
 async function renderUsers() {
   const list = document.getElementById('users-list');
   list.innerHTML = '<p class="empty-state" style="padding:8px 0;">Loading…</p>';
-  const { data: users, error } = await _sb.from('profiles').select('*').order('created_at');
-  if (error || !users?.length) { list.innerHTML = '<p class="empty-state">No users found.</p>'; return; }
-  list.innerHTML = users.map(u => {
+  const stableId = currentProfile?.stable_id;
+  const [{ data: members }, { data: pending }] = await Promise.all([
+    _sb.from('profiles').select('*').eq('stable_id', stableId).order('created_at'),
+    _sb.from('profiles').select('*').is('stable_id', null).order('created_at')
+  ]);
+  const memberCount = members?.length || 0;
+  const atMax = memberCount >= 5;
+  let html = '';
+  html += `<div class="section-label">Your stable (${memberCount}/5)</div>`;
+  html += (members || []).map(u => {
     const isMe = u.id === currentUser?.id;
-    const roleLabel = u.role === 'admin' ? 'Admin' : u.role === 'member' ? 'Member' : 'Pending';
-    const rolePill = u.role === 'admin' ? 'pill-ok' : u.role === 'member' ? 'pill-warn' : 'pill-danger';
-    let btns = '';
-    if (!isMe && currentProfile?.role === 'admin') {
-      if (u.role === 'pending') {
-        btns = `<button class="detail-quick-btn" style="background:var(--ok-light);color:var(--ok);border-color:var(--ok-light);padding:8px 16px;" onclick="setUserRole('${u.id}','member')">Approve</button>`;
-      } else if (u.role === 'member') {
-        btns = `<button class="detail-quick-btn" style="background:var(--accent-light);color:var(--accent);border-color:var(--accent-light);padding:8px 12px;margin-right:6px;" onclick="setUserRole('${u.id}','admin')">Make admin</button>`
-             + `<button class="detail-quick-btn" style="background:var(--danger-light);color:var(--danger);border-color:var(--danger-light);padding:8px 12px;" onclick="setUserRole('${u.id}','pending')">Remove</button>`;
-      }
-    }
+    const roleLabel = u.role === 'owner' ? 'Owner' : 'Worker';
+    const rolePill = u.role === 'owner' ? 'pill-ok' : 'pill-warn';
+    const btns = (!isMe && u.role === 'worker')
+      ? `<button class="detail-quick-btn" style="background:var(--danger-light);color:var(--danger);border-color:var(--danger-light);padding:8px 14px;" onclick="doRemoveUser('${u.id}')">Remove</button>`
+      : '';
     return `<div class="card"><div style="padding:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:${btns?'10px':'0'};">
         <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${esc(u.email)}</div>${isMe?'<div style="font-size:12px;color:var(--ink3);">You</div>':''}</div>
         <span class="pill ${rolePill}">${roleLabel}</span>
-      </div>${btns?`<div style="display:flex;gap:6px;">${btns}</div>`:''}
+      </div>${btns?`<div>${btns}</div>`:''}
     </div></div>`;
   }).join('');
+  if (pending?.length) {
+    html += `<div class="section-label" style="margin-top:20px;">Waiting to join</div>`;
+    html += pending.map(u => {
+      const btn = atMax
+        ? `<span style="font-size:12px;color:var(--ink3);">Stable full (max 5 users)</span>`
+        : `<button class="detail-quick-btn" style="background:var(--ok-light);color:var(--ok);border-color:var(--ok-light);padding:8px 16px;" onclick="doApproveUser('${u.id}')">Add to stable</button>`;
+      return `<div class="card"><div style="padding:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="flex:1;font-weight:600;font-size:14px;">${esc(u.email)}</div>
+          <span class="pill pill-danger">Pending</span>
+        </div><div>${btn}</div>
+      </div></div>`;
+    }).join('');
+  }
+  list.innerHTML = html;
 }
 
-async function setUserRole(userId, role) {
-  const { error } = await _sb.rpc('set_user_role', { target_user_id: userId, new_role: role });
+async function doApproveUser(userId) {
+  const { error } = await _sb.rpc('approve_user', { target_user_id: userId });
+  if (error) { alert('Failed: ' + error.message); return; }
+  renderUsers();
+}
+
+async function doRemoveUser(userId) {
+  if (!confirm('Remove this worker from your stable?')) return;
+  const { error } = await _sb.rpc('remove_user', { target_user_id: userId });
   if (error) { alert('Failed: ' + error.message); return; }
   renderUsers();
 }
