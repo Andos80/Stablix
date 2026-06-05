@@ -849,6 +849,7 @@ const SEED = {
 };
 
 function runMigrations(d) {
+  if (!d.horses) d.horses = {};
   if (!d.events) d.events = JSON.parse(JSON.stringify(SEED.events));
   let vri = 0;
   Object.values(d.horses).forEach(h => {
