@@ -11,7 +11,7 @@
 <title>Stablix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="document.getElementById('loading-screen').innerHTML='<div style=\'color:#fff;font-family:sans-serif;text-align:center;padding:24px\'><div style=\'font-size:24px;margin-bottom:12px\'>Stablix</div><div>No internet connection.<br>Please try again.</div></div>'"></script>
 <style>
 :root {
   --bg: #F7F5F0;
@@ -2319,6 +2319,13 @@ async function showApp() {
   document.getElementById('nav-users-btn').style.display = currentProfile?.role === 'admin' ? '' : 'none';
   renderHorseList();
 }
+
+// If auth hasn't resolved in 8 seconds, stop spinning and show login
+setTimeout(() => {
+  if (document.getElementById('loading-screen').style.display !== 'none') {
+    showLoginScreen();
+  }
+}, 8000);
 
 _sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'INITIAL_SESSION') {
