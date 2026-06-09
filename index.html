@@ -314,7 +314,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 <div id="login-screen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">Stablix</div>
-    <div class="auth-sub">Stable management</div>
+    <div class="auth-sub" id="auth-tagline">Stable management</div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Sign in</button>
       <button class="auth-tab" id="tab-signup" onclick="showAuthTab('signup')">Sign up</button>
@@ -323,12 +323,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div id="form-login">
       <input class="modal-input" type="email" id="l-email" placeholder="Email" autocomplete="email">
       <input class="modal-input" type="password" id="l-pass" placeholder="Password" autocomplete="current-password">
-      <button class="modal-confirm" onclick="doLogin()">Sign in</button>
+      <button class="modal-confirm" id="login-submit-btn" onclick="doLogin()">Sign in</button>
       <div style="text-align:center;margin-top:12px;">
-        <button type="button" onclick="toggleForgot()" style="background:none;border:none;color:var(--ink3);font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);padding:0;">Forgot password?</button>
+        <button type="button" id="forgot-toggle-btn" onclick="toggleForgot()" style="background:none;border:none;color:var(--ink3);font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);padding:0;">Forgot password?</button>
       </div>
       <div id="form-forgot" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
-        <div style="font-size:13px;color:var(--ink2);margin-bottom:10px;">Enter your email and we'll send a reset link.</div>
+        <div id="forgot-desc-text" style="font-size:13px;color:var(--ink2);margin-bottom:10px;">Enter your email and we'll send a reset link.</div>
         <input class="modal-input" type="email" id="forgot-email" placeholder="Email" autocomplete="email">
         <button class="modal-confirm" id="forgot-btn" onclick="doForgotPassword()">Send reset link</button>
         <div id="forgot-msg" style="display:none;margin-top:10px;font-size:13px;color:var(--ok);text-align:center;padding:8px;background:var(--ok-light);border-radius:var(--radius-sm);"></div>
@@ -337,8 +337,8 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div id="form-signup" style="display:none">
       <input class="modal-input" type="email" id="s-email" placeholder="Email" autocomplete="email">
       <input class="modal-input" type="password" id="s-pass" placeholder="Password (min 6 characters)" autocomplete="new-password">
-      <button class="modal-confirm" onclick="doSignup()">Create account</button>
-      <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:14px;line-height:1.6;">
+      <button class="modal-confirm" id="signup-submit-btn" onclick="doSignup()">Create account</button>
+      <div id="auth-gdpr-text" style="font-size:11px;color:var(--ink3);text-align:center;margin-top:14px;line-height:1.6;">
         By creating an account you accept that your email address is stored to provide access to Stablix. Data is processed in accordance with GDPR. To request deletion of your account and data, contact the stable owner.
       </div>
     </div>
@@ -348,13 +348,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 <div id="pending-screen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">Stablix</div>
-    <div class="auth-sub">Create your own stable, or wait to be added to one.</div>
+    <div class="auth-sub" id="pending-desc">Create your own stable, or wait to be added to one.</div>
     <input class="modal-input" type="text" id="stable-name-input" placeholder="Stable name">
-    <button class="modal-confirm" onclick="doCreateStable()">Create my stable</button>
+    <button class="modal-confirm" id="pending-create-btn" onclick="doCreateStable()">Create my stable</button>
     <div style="text-align:center;font-size:13px;color:var(--ink3);margin:14px 0;">— or —</div>
-    <div class="auth-msg">Waiting for a stable owner to add you. Ask them to open the app and approve you in the Users screen.</div>
-    <button class="modal-confirm" style="background:var(--surface2);color:var(--ink);border:1px solid var(--border);margin-top:10px;" onclick="doCheckApproval()">Check for approval</button>
-    <button class="modal-confirm" style="background:transparent;color:var(--ink3);border:none;margin-top:4px;" onclick="doLogout()">Sign out</button>
+    <div class="auth-msg" id="pending-wait-text">Waiting for a stable owner to add you. Ask them to open the app and approve you in the Users screen.</div>
+    <button class="modal-confirm" id="pending-check-btn" style="background:var(--surface2);color:var(--ink);border:1px solid var(--border);margin-top:10px;" onclick="doCheckApproval()">Check for approval</button>
+    <button class="modal-confirm" id="pending-signout-btn" style="background:transparent;color:var(--ink3);border:none;margin-top:4px;" onclick="doLogout()">Sign out</button>
   </div>
 </div>
 
@@ -369,6 +369,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <button class="topbar-btn" onclick="toggleDark()" id="darkTopBtn" aria-label="Toggle dark mode">
         <svg id="darkTopIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
+      <button class="topbar-btn" onclick="toggleLang()" id="langBtn" aria-label="Toggle language" style="font-size:18px;line-height:1;">🇳🇴</button>
       <button class="topbar-btn" onclick="handlePlusBtn()" aria-label="Add">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
@@ -380,44 +381,44 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <!-- HOME -->
     <div class="page active" id="pg-home">
       <div class="home-menu">
-        <button class="home-menu-btn" onclick="navTo('calendar','Calendar')">
+        <button class="home-menu-btn" onclick="navTo('calendar',T('nav.calendar'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-          <span>Calendar</span>
+          <span id="home-calendar-lbl">Calendar</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('horses','Horses')">
+        <button class="home-menu-btn" onclick="bNav('horses',T('page.horses'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg></div>
-          <span>Horses</span>
+          <span id="home-horses-lbl">Horses</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('vaccinations','Vaccinations')">
+        <button class="home-menu-btn" onclick="bNav('vaccinations',T('nav.vaccinations'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-          <span>Vaccinations</span>
+          <span id="home-vac-lbl">Vaccinations</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('farrier','Farrier')">
+        <button class="home-menu-btn" onclick="bNav('farrier',T('nav.farrier'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-          <span>Farrier</span>
+          <span id="home-farr-lbl">Farrier</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('dentist','Dentist')">
+        <button class="home-menu-btn" onclick="bNav('dentist',T('nav.dentist'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 7 6c-.5 2.5.5 4 1 6 .5 2 .5 4 1 6h6c.5-2 .5-4 1-6 .5-2 1.5-3.5 1-6-.5-2.5-2.5-4-5-4z"/></svg></div>
-          <span>Dentist</span>
+          <span id="home-dent-lbl">Dentist</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('feeding','Feeding plan')">
+        <button class="home-menu-btn" onclick="bNav('feeding',T('page.feeding'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg></div>
-          <span>Feeding plan</span>
+          <span id="home-feed-lbl">Feeding plan</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('costs','Costs')">
+        <button class="home-menu-btn" onclick="bNav('costs',T('nav.costs'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <span>Costs</span>
+          <span id="home-costs-lbl">Costs</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
-        <button class="home-menu-btn" onclick="bNav('files','Files')">
+        <button class="home-menu-btn" onclick="bNav('files',T('nav.files'))">
           <div class="home-menu-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
-          <span>Files</span>
+          <span id="home-files-lbl">Files</span>
           <div class="home-menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
         </button>
       </div>
@@ -425,7 +426,7 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
     <!-- HORSE DETAIL -->
     <div class="page" id="pg-horse">
-      <button class="back-btn" onclick="goBack('horses')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Horses</button>
+      <button class="back-btn" onclick="goBack('horses')" data-i18n-horses-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Horses</button>
       <div class="detail-hero">
         <button class="hero-edit-btn" onclick="openEditHorse()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <div class="hero-top">
@@ -438,78 +439,78 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
           </div>
         </div>
         <div class="detail-quick">
-          <button class="detail-quick-btn" onclick="openActivities()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activities</button>
-          <button class="detail-quick-btn" onclick="openHorseHealth()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Health</button>
-          <button class="detail-quick-btn" onclick="openHorseFilesFromHorse()"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
-          <button class="detail-quick-btn" onclick="openHorseFeeding()"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding</button>
-          <button class="detail-quick-btn" onclick="openHorseCosts()"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
-          <button class="detail-quick-btn" onclick="openHorseNotes()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></svg>Notes</button>
+          <button class="detail-quick-btn" onclick="openActivities()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span id="hq-activities">Activities</span></button>
+          <button class="detail-quick-btn" onclick="openHorseHealth()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span id="hq-health">Health</span></button>
+          <button class="detail-quick-btn" onclick="openHorseFilesFromHorse()"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span id="hq-files">Files</span></button>
+          <button class="detail-quick-btn" onclick="openHorseFeeding()"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg><span id="hq-feeding">Feeding</span></button>
+          <button class="detail-quick-btn" onclick="openHorseCosts()"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span id="hq-costs">Costs</span></button>
+          <button class="detail-quick-btn" onclick="openHorseNotes()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></svg><span id="hq-notes">Notes</span></button>
         </div>
       </div>
       <div class="card">
         <div class="info-list">
-          <div class="info-row"><span class="info-key">Date of birth</span><span class="info-val" id="h-born">—</span></div>
-          <div class="info-row"><span class="info-key">Breed</span><span class="info-val" id="h-breed">—</span></div>
-          <div class="info-row"><span class="info-key">Sire</span><span class="info-val" id="h-sire">—</span></div>
-          <div class="info-row"><span class="info-key">Dam</span><span class="info-val" id="h-dam">—</span></div>
-          <div class="info-row"><span class="info-key">Colour</span><span class="info-val" id="h-color">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-dob">Date of birth</span><span class="info-val" id="h-born">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-breed">Breed</span><span class="info-val" id="h-breed">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-sire">Sire</span><span class="info-val" id="h-sire">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-dam">Dam</span><span class="info-val" id="h-dam">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-colour">Colour</span><span class="info-val" id="h-color">—</span></div>
         </div>
       </div>
       <div class="card">
         <div class="info-list">
-          <div class="info-row"><span class="info-key">Last shod</span><span class="pill" id="h-farrier">—</span></div>
-          <div class="info-row"><span class="info-key">Last vaccinated</span><span class="pill" id="h-vac">—</span></div>
-          <div class="info-row"><span class="info-key">Last dentist</span><span class="pill" id="h-dent">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-last-shod">Last shod</span><span class="pill" id="h-farrier">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-last-vac">Last vaccinated</span><span class="pill" id="h-vac">—</span></div>
+          <div class="info-row"><span class="info-key" id="hi-last-dent">Last dentist</span><span class="pill" id="h-dent">—</span></div>
         </div>
       </div>
     </div>
 
     <!-- ACTIVITIES -->
     <div class="page" id="pg-activities">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <button class="back-btn" onclick="showPage('pg-horse')" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 4px;" id="act-horse-name">—</div>
       <div id="activities-list"></div>
-      <button class="add-btn-full" onclick="openActModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add activity</button>
+      <button class="add-btn-full" onclick="openActModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="act-add-btn-lbl">Add activity</span></button>
     </div>
 
     <!-- HORSE HEALTH -->
     <div class="page" id="pg-horse-health">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
-      <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;">Health</div>
+      <button class="back-btn" onclick="showPage('pg-horse')" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <div id="pg-health-heading" style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;">Health</div>
       <div id="horse-health-content"></div>
     </div>
 
     <!-- HORSE FILES -->
     <div class="page" id="pg-horse-files">
-      <button class="back-btn" id="horse-files-back-btn" onclick="goBackFromFiles()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <button class="back-btn" id="horse-files-back-btn" onclick="goBackFromFiles()" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;" id="horse-files-name">Files</div>
       <div id="horse-files-content"></div>
     </div>
 
     <!-- HORSE FEEDING -->
     <div class="page" id="pg-horse-feeding">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <button class="back-btn" onclick="showPage('pg-horse')" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;">Feeding plan</div>
       <div class="card" id="horse-feeding-content"></div>
     </div>
 
     <!-- HORSE COSTS -->
     <div class="page" id="pg-horse-costs">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <button class="back-btn" onclick="showPage('pg-horse')" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 4px;" id="horse-costs-name">—</div>
       <div id="horse-costs-list"></div>
-      <button class="add-btn-full" onclick="openCostModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add cost</button>
+      <button class="add-btn-full" onclick="openCostModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="costs-add-btn-lbl">Add cost</span></button>
     </div>
 
     <!-- HORSE NOTES -->
     <div class="page" id="pg-horse-notes">
-      <button class="back-btn" onclick="showPage('pg-horse')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+      <button class="back-btn" onclick="showPage('pg-horse')" data-i18n-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;" id="horse-notes-name">—</div>
       <div id="horse-notes-list"></div>
       <div class="card" style="margin-top:10px;">
         <div style="padding:12px;">
           <textarea class="modal-textarea" id="note-input" placeholder="Write a note..."></textarea>
-          <button class="add-btn-full" style="margin-top:0;" onclick="saveNote()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add note</button>
+          <button class="add-btn-full" id="notes-add-btn" style="margin-top:0;" onclick="saveNote()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="notes-add-lbl">Add note</span></button>
         </div>
       </div>
     </div>
@@ -527,67 +528,67 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
     <!-- VACCINATIONS -->
     <div class="page" id="pg-vaccinations">
-      <div class="page-heading">Vaccinations</div>
+      <div class="page-heading" id="pg-vac-heading">Vaccinations</div>
       <div id="vac-list"></div>
     </div>
 
     <!-- FARRIER -->
     <div class="page" id="pg-farrier">
-      <div class="page-heading">Farrier</div>
+      <div class="page-heading" id="pg-farrier-heading">Farrier</div>
       <div id="farrier-list"></div>
     </div>
 
     <!-- FEEDING OVERVIEW -->
     <div class="page" id="pg-feeding">
-      <div class="page-heading">Feeding plan</div>
+      <div class="page-heading" id="pg-feeding-heading">Feeding plan</div>
       <div id="feeding-list"></div>
     </div>
 
     <!-- MEAL DETAIL -->
     <div class="page" id="pg-meal">
-      <button class="back-btn" onclick="renderFeedingOverview();showPage('pg-feeding')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Feeding plan</button>
+      <button class="back-btn" onclick="renderFeedingOverview();showPage('pg-feeding')" data-i18n-feed-back><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Feeding plan</button>
       <div style="font-family: var(--font-display); font-size: 22px; margin-bottom: 14px;" id="meal-title">—</div>
       <div class="card" id="meal-content"></div>
     </div>
 
     <!-- HORSES LIST -->
     <div class="page" id="pg-horses">
-      <div class="page-heading">Horses</div>
+      <div class="page-heading" id="pg-horses-heading">Horses</div>
       <div id="horses-list"></div>
-      <button class="add-btn-full" onclick="openAddHorse()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add horse</button>
+      <button class="add-btn-full" onclick="openAddHorse()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="horses-add-btn-lbl">Add horse</span></button>
     </div>
 
     <!-- DENTIST -->
     <div class="page" id="pg-dentist">
-      <div class="page-heading">Dentist</div>
+      <div class="page-heading" id="pg-dentist-heading">Dentist</div>
       <div id="dentist-list"></div>
     </div>
 
     <!-- COSTS OVERVIEW -->
     <div class="page" id="pg-costs">
-      <div class="page-heading">Costs</div>
+      <div class="page-heading" id="pg-costs-heading">Costs</div>
       <div id="costs-overview"></div>
     </div>
 
     <!-- FILES -->
     <div class="page" id="pg-files">
-      <div class="page-heading">Files</div>
+      <div class="page-heading" id="pg-files-heading">Files</div>
       <div id="files-overview"></div>
     </div>
 
     <!-- USERS (admin) -->
     <div class="page" id="pg-users">
-      <div class="page-heading">Users</div>
+      <div class="page-heading" id="pg-users-heading">Users</div>
       <div id="users-list"></div>
     </div>
 
   </main>
 
   <nav class="bottom-nav">
-    <button class="bnav-btn active" id="bn-home" onclick="bNav('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
-    <button class="bnav-btn" id="bn-calendar" onclick="bNav('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendar</button>
-    <button class="bnav-btn" id="bn-horses" onclick="bNav('horses','Horses')"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg>Horses</button>
-    <button class="bnav-btn" id="bn-feeding" onclick="bNav('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding</button>
+    <button class="bnav-btn active" id="bn-home" onclick="bNav('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span id="bn-home-lbl">Home</span></button>
+    <button class="bnav-btn" id="bn-calendar" onclick="bNav('calendar',T('nav.calendar'))"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span id="bn-calendar-lbl">Calendar</span></button>
+    <button class="bnav-btn" id="bn-horses" onclick="bNav('horses',T('page.horses'))"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg><span id="bn-horses-lbl">Horses</span></button>
+    <button class="bnav-btn" id="bn-feeding" onclick="bNav('feeding',T('page.feeding'))"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg><span id="bn-feeding-lbl">Feeding</span></button>
   </nav>
 
 </div>
@@ -596,20 +597,20 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 <div class="nav-overlay" id="navOverlay" onclick="closeNavIfBg(event)">
   <div class="nav-panel">
     <div class="nav-logo">Stablix</div>
-    <button class="nav-item" onclick="navTo('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
-    <button class="nav-item" onclick="navTo('calendar','Calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendar</button>
-    <button class="nav-item" onclick="navTo('horses','Horses')"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg>Horses</button>
-    <button class="nav-item" onclick="navTo('vaccinations','Vaccinations')"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Vaccinations</button>
-    <button class="nav-item" onclick="navTo('farrier','Farrier')"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Farrier</button>
-    <button class="nav-item" onclick="navTo('dentist','Dentist')"><svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 7 6c-.5 2.5.5 4 1 6 .5 2 .5 4 1 6h6c.5-2 .5-4 1-6 .5-2 1.5-3.5 1-6-.5-2.5-2.5-4-5-4z"/></svg>Dentist</button>
-    <button class="nav-item" onclick="navTo('feeding','Feeding plan')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Feeding plan</button>
-    <button class="nav-item" onclick="navTo('costs','Costs')"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Costs</button>
-    <button class="nav-item" onclick="navTo('files','Files')"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files</button>
-    <button class="nav-item" id="nav-users-btn" style="display:none" onclick="navTo('users','Users')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</button>
+    <button class="nav-item" onclick="navTo('home','Stablix')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span id="nav-home-lbl">Home</span></button>
+    <button class="nav-item" onclick="navTo('calendar',T('nav.calendar'))"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span id="nav-calendar-lbl">Calendar</span></button>
+    <button class="nav-item" onclick="navTo('horses',T('page.horses'))"><svg viewBox="0 0 24 24"><path d="M4 17s0-4 4-6c0 0 2-1 4-1s4 1 4 1c2-1 3-3 3-3l1-4-3 1s-1-2-3-2-4 2-4 2c-2 0-4 2-4 2C4 9 3 12 3 14v3h1z"/></svg><span id="nav-horses-lbl">Horses</span></button>
+    <button class="nav-item" onclick="navTo('vaccinations',T('nav.vaccinations'))"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span id="nav-vac-lbl">Vaccinations</span></button>
+    <button class="nav-item" onclick="navTo('farrier',T('nav.farrier'))"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span id="nav-farr-lbl">Farrier</span></button>
+    <button class="nav-item" onclick="navTo('dentist',T('nav.dentist'))"><svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 7 6c-.5 2.5.5 4 1 6 .5 2 .5 4 1 6h6c.5-2 .5-4 1-6 .5-2 1.5-3.5 1-6-.5-2.5-2.5-4-5-4z"/></svg><span id="nav-dent-lbl">Dentist</span></button>
+    <button class="nav-item" onclick="navTo('feeding',T('page.feeding'))"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg><span id="nav-feed-lbl">Feeding plan</span></button>
+    <button class="nav-item" onclick="navTo('costs',T('nav.costs'))"><svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span id="nav-costs-lbl">Costs</span></button>
+    <button class="nav-item" onclick="navTo('files',T('nav.files'))"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span id="nav-files-lbl">Files</span></button>
+    <button class="nav-item" id="nav-users-btn" style="display:none" onclick="navTo('users',T('nav.users'))"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span id="nav-users-lbl">Users</span></button>
     <div class="nav-divider"></div>
-    <button class="nav-item" onclick="exportData();closeNav()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>Export data</button>
-    <button class="nav-item" onclick="importData()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>Import data</button>
-    <button class="nav-item" onclick="doLogout();closeNav()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</button>
+    <button class="nav-item" onclick="exportData();closeNav()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><span id="nav-export-lbl">Export data</span></button>
+    <button class="nav-item" onclick="importData()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg><span id="nav-import-lbl">Import data</span></button>
+    <button class="nav-item" onclick="doLogout();closeNav()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span id="nav-signout-lbl">Sign out</span></button>
   </div>
 </div>
 
@@ -636,17 +637,17 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title">Add activity</div>
     <div class="act-grid">
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Flatwork</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Jumping</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Hacking</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Show</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Vet check</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Massage</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Walker</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Pole work</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Treadmill</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 7 7"/><polyline points="1 12 5 12 5 16"/></svg>Lunging</button>
-      <button class="act-pick" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>Day off</button>
+      <button class="act-pick" data-type="Flatwork" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Flatwork</span></button>
+      <button class="act-pick" data-type="Jumping" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span>Jumping</span></button>
+      <button class="act-pick" data-type="Hacking" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Hacking</span></button>
+      <button class="act-pick" data-type="Show" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Show</span></button>
+      <button class="act-pick" data-type="Vet check" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Vet check</span></button>
+      <button class="act-pick" data-type="Massage" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Massage</span></button>
+      <button class="act-pick" data-type="Walker" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>Walker</span></button>
+      <button class="act-pick" data-type="Pole work" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Pole work</span></button>
+      <button class="act-pick" data-type="Treadmill" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Treadmill</span></button>
+      <button class="act-pick" data-type="Lunging" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 7 7"/><polyline points="1 12 5 12 5 16"/></svg><span>Lunging</span></button>
+      <button class="act-pick" data-type="Day off" onclick="pickAct(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><span>Day off</span></button>
     </div>
     <input class="modal-input" type="text" id="act-note-input" placeholder="Note (optional)">
     <button class="modal-confirm" onclick="confirmActivity()">Add activity</button>
@@ -700,12 +701,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title" id="event-modal-title">Add event</div>
     <div class="act-grid" id="event-type-grid">
-      <button class="act-pick" data-type="farr" onclick="pickEvType(this)">Farrier</button>
-      <button class="act-pick" data-type="vac" onclick="pickEvType(this)">Vaccination</button>
-      <button class="act-pick" data-type="dent" onclick="pickEvType(this)">Dentist</button>
-      <button class="act-pick" data-type="show" onclick="pickEvType(this)">Show</button>
-      <button class="act-pick" data-type="vet" onclick="pickEvType(this)">Vet</button>
-      <button class="act-pick" data-type="other" onclick="pickEvType(this)">Other</button>
+      <button class="act-pick" data-type="farr" onclick="pickEvType(this)"><span>Farrier</span></button>
+      <button class="act-pick" data-type="vac" onclick="pickEvType(this)"><span>Vaccination</span></button>
+      <button class="act-pick" data-type="dent" onclick="pickEvType(this)"><span>Dentist</span></button>
+      <button class="act-pick" data-type="show" onclick="pickEvType(this)"><span>Show</span></button>
+      <button class="act-pick" data-type="vet" onclick="pickEvType(this)"><span>Vet</span></button>
+      <button class="act-pick" data-type="other" onclick="pickEvType(this)"><span>Other</span></button>
     </div>
     <select class="modal-input" id="ev-horse-input"></select>
     <input class="modal-input" type="date" id="ev-date-input">
@@ -722,9 +723,9 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-title" id="vac-modal-title">Add vaccination</div>
     <select class="modal-input" id="vac-horse-input"></select>
     <input class="modal-input" type="text" id="vac-type-input" placeholder="Type (e.g. Influenza)">
-    <label class="modal-label">Vaccination date</label>
+    <label class="modal-label" for-key="date">Vaccination date</label>
     <input class="modal-input" type="date" id="vac-date-input">
-    <label class="modal-label">Next vaccination (optional)</label>
+    <label class="modal-label" for-key="next">Next vaccination (optional)</label>
     <input class="modal-input" type="date" id="vac-next-input">
     <button class="modal-confirm" id="vac-modal-confirm" onclick="confirmVac()">Add</button>
     <button class="btn-delete" id="delete-vac-btn" style="display:none;" onclick="deleteCurrentVacRec()">Delete record</button>
@@ -737,11 +738,11 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title">Farrier</div>
     <select class="modal-input" id="farr-horse-input"></select>
-    <label class="modal-label">Last shod</label>
+    <label class="modal-label" for-key="date">Last shod</label>
     <input class="modal-input" type="date" id="farr-date-input">
     <input class="modal-input" type="text" id="farr-type-input" placeholder="Shoe type (e.g. Full shoe)">
     <input class="modal-input" type="text" id="farr-name-input" placeholder="Farrier name (optional)">
-    <label class="modal-label">Next appointment (optional)</label>
+    <label class="modal-label" for-key="next">Next appointment (optional)</label>
     <input class="modal-input" type="date" id="farr-next-input">
     <button class="modal-confirm" onclick="confirmFarrier()">Save</button>
   </div>
@@ -753,12 +754,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title">Dentist</div>
     <select class="modal-input" id="dent-horse-input"></select>
-    <label class="modal-label">Last visit</label>
+    <label class="modal-label" for-key="date">Last visit</label>
     <input class="modal-input" type="date" id="dent-date-input">
     <input class="modal-input" type="text" id="dent-treatment-input" placeholder="Treatment (optional)">
     <textarea class="modal-input" id="dent-note-input" placeholder="Note (optional)" rows="3" style="resize:none;"></textarea>
     <input class="modal-input" type="text" id="dent-name-input" placeholder="Dentist name (optional)">
-    <label class="modal-label">Next appointment (optional)</label>
+    <label class="modal-label" for-key="next">Next appointment (optional)</label>
     <input class="modal-input" type="date" id="dent-next-input">
     <button class="modal-confirm" onclick="confirmDentist()">Save</button>
   </div>
@@ -770,12 +771,12 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
     <div class="modal-handle"></div>
     <div class="modal-title">Add cost</div>
     <div class="act-grid" id="cost-cat-grid">
-      <button class="act-pick" onclick="pickCat(this)">Farrier</button>
-      <button class="act-pick" onclick="pickCat(this)">Vet</button>
-      <button class="act-pick" onclick="pickCat(this)">Feed</button>
-      <button class="act-pick" onclick="pickCat(this)">Supplements</button>
-      <button class="act-pick" onclick="pickCat(this)">Show</button>
-      <button class="act-pick" onclick="pickCat(this)">Other</button>
+      <button class="act-pick" data-cat="Farrier" onclick="pickCat(this)">Farrier</button>
+      <button class="act-pick" data-cat="Vet" onclick="pickCat(this)">Vet</button>
+      <button class="act-pick" data-cat="Feed" onclick="pickCat(this)">Feed</button>
+      <button class="act-pick" data-cat="Supplements" onclick="pickCat(this)">Supplements</button>
+      <button class="act-pick" data-cat="Show" onclick="pickCat(this)">Show</button>
+      <button class="act-pick" data-cat="Other" onclick="pickCat(this)">Other</button>
     </div>
     <input class="modal-input" type="number" id="cost-amount-input" placeholder="Amount (kr)" inputmode="decimal">
     <input class="modal-input" type="text" id="cost-date-input" placeholder="Date (DD.MM.YYYY)">
@@ -799,13 +800,13 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="feedProfile-title">Feed profile</div>
-    <label class="modal-label">Hay</label>
+    <label class="modal-label" data-i18n="feed.hay_label">Hay</label>
     <div class="act-grid-2" id="feedProfile-hay"></div>
     <div id="feedProfile-hay-amounts"></div>
-    <label class="modal-label">Compound feed</label>
+    <label class="modal-label" data-i18n="feed.compounds_label">Compound feed</label>
     <div class="act-grid-2" id="feedProfile-compounds"></div>
     <div id="feedProfile-compounds-amounts"></div>
-    <label class="modal-label">Supplements</label>
+    <label class="modal-label" data-i18n="feed.supplements_label">Supplements</label>
     <div class="act-grid" id="feedProfile-supplements"></div>
     <div id="feedProfile-supplements-amounts"></div>
     <button class="modal-confirm" onclick="saveFeedProfile()">Save</button>
@@ -857,6 +858,458 @@ async function sbRpc(fn, args) {
   });
   if (!res.ok) { const t = await res.text(); throw new Error(t); }
   return res.json().catch(() => null);
+}
+
+// ─── Language ─────────────────────────────────────────────────────────────────
+
+let lang = localStorage.getItem('stablix_lang') || 'en';
+
+const LANG = {
+  en: {
+    // Auth
+    'auth.tagline':'Stable management','auth.signin_tab':'Sign in','auth.signup_tab':'Sign up',
+    'auth.email':'Email','auth.password':'Password','auth.password_min':'Password (min 6 characters)',
+    'auth.signing_in':'Signing in…','auth.signin':'Sign in','auth.creating':'Creating…',
+    'auth.create_account':'Create account','auth.forgot':'Forgot password?',
+    'auth.forgot_desc':"Enter your email and we'll send a reset link.",
+    'auth.send_reset':'Send reset link','auth.sending':'Sending…',
+    'auth.reset_sent':'Check your inbox — a reset link is on its way.',
+    'auth.gdpr':'By creating an account you accept that your email address is stored to provide access to Stablix. Data is processed in accordance with GDPR. To request deletion of your account and data, contact the stable owner.',
+    'auth.err_fill':'Please enter email and password.','auth.err_pass':'Password must be at least 6 characters.',
+    'auth.err_email':'Please enter your email address.',
+    'auth.created':'Account created! Ask the admin to approve your access, then sign in.',
+    'auth.not_approved':'Not approved yet. Ask the stable owner to add you in their Users screen.',
+    // Pending
+    'pending.desc':'Create your own stable, or wait to be added to one.',
+    'pending.name':'Stable name','pending.create':'Create my stable','pending.creating':'Creating…',
+    'pending.waiting':'Waiting for a stable owner to add you. Ask them to open the app and approve you in the Users screen.',
+    'pending.check':'Check for approval','pending.signout':'Sign out',
+    // Nav
+    'nav.home':'Home','nav.calendar':'Calendar','nav.horses':'Horses','nav.feeding':'Feeding',
+    'nav.vaccinations':'Vaccinations','nav.farrier':'Farrier','nav.dentist':'Dentist',
+    'nav.feeding_plan':'Feeding plan','nav.costs':'Costs','nav.files':'Files',
+    'nav.users':'Users','nav.export':'Export data','nav.import':'Import data','nav.signout':'Sign out',
+    // Pages
+    'page.horses':'Horses','page.vaccinations':'Vaccinations','page.farrier':'Farrier',
+    'page.dentist':'Dentist','page.feeding':'Feeding plan','page.costs':'Costs','page.files':'Files',
+    'page.users':'Users','page.health':'Health','page.activities':'Activities',
+    'page.notes':'Notes','page.back':'Back',
+    // Horse info
+    'info.dob':'Date of birth','info.breed':'Breed','info.sire':'Sire','info.dam':'Dam',
+    'info.colour':'Colour','info.last_shod':'Last shod','info.last_vac':'Last vaccinated','info.last_dent':'Last dentist',
+    // Horse buttons
+    'horse.activities':'Activities','horse.health':'Health','horse.files':'Files',
+    'horse.feeding':'Feeding','horse.costs':'Costs','horse.notes':'Notes',
+    // Horses list
+    'horses.empty':'No horses yet. Tap + to add one.','horses.add':'Add horse',
+    'horses.add_title':'Add horse','horses.edit_title':'Edit horse',
+    'horses.name_ph':'Name *','horses.breed_ph':'Breed (optional)','horses.colour_ph':'Colour (optional)',
+    'horses.colour_cal':'Colour on calendar','horses.save':'Save','horses.delete':'Delete horse',
+    'horses.delete_confirm':'Delete {name}? This cannot be undone.',
+    // Activities
+    'act.add':'Add activity','act.note_ph':'Note (optional)','act.empty':'No activities yet.',
+    'act.Flatwork':'Flatwork','act.Jumping':'Jumping','act.Hacking':'Hacking','act.Show':'Show',
+    'act.Vet check':'Vet check','act.Massage':'Massage','act.Walker':'Walker',
+    'act.Pole work':'Pole work','act.Treadmill':'Treadmill','act.Lunging':'Lunging','act.Day off':'Day off',
+    // Health
+    'health.vaccinations':'Vaccinations','health.farrier':'Farrier','health.dentist':'Dentist',
+    'health.next':'Next','health.last_shod':'Last shod','health.type':'Type','health.last':'Last',
+    'health.treatment':'Treatment','health.note':'Note',
+    // Vaccinations
+    'vac.empty':'No horses yet.','vac.no_records':'No records yet','vac.next':'Next',
+    'vac.add_inline':'+ Add','vac.add':'Add vaccination','vac.edit':'Edit vaccination',
+    'vac.type_ph':'Type (e.g. Influenza)','vac.date_label':'Vaccination date',
+    'vac.next_label':'Next vaccination (optional)',
+    'vac.save_add':'Add','vac.save_edit':'Save','vac.delete':'Delete record',
+    // Farrier
+    'farr.empty':'No horses yet.','farr.last_shod':'Last shod','farr.type':'Type',
+    'farr.name':'Farrier','farr.next':'Next','farr.modal_title':'Farrier',
+    'farr.last_label':'Last shod','farr.shoe_ph':'Shoe type (e.g. Full shoe)',
+    'farr.name_ph':'Farrier name (optional)','farr.next_label':'Next appointment (optional)','farr.save':'Save',
+    // Dentist
+    'dent.empty':'No horses yet.','dent.last':'Last visit','dent.treatment':'Treatment',
+    'dent.note':'Note','dent.name':'Dentist','dent.next':'Next','dent.modal_title':'Dentist',
+    'dent.last_label':'Last visit','dent.treatment_ph':'Treatment (optional)',
+    'dent.note_ph':'Note (optional)','dent.name_ph':'Dentist name (optional)',
+    'dent.next_label':'Next appointment (optional)','dent.save':'Save',
+    // Feeding
+    'feed.plan':'Feeding plan','feed.back':'Feeding plan',
+    'feed.breakfast':'Breakfast','feed.lunch':'Lunch','feed.dinner':'Dinner',
+    'feed.all_horses':'all horses','feed.section':'Feed & Supplements',
+    'feed.nothing':'Nothing added yet','feed.add_ph':'Add item…','feed.add':'Add',
+    'feed.empty':'No horses yet.','feed.hay_label':'Hay','feed.compounds_label':'Compound feed',
+    'feed.supplements_label':'Supplements','feed.profile_save':'Save',
+    'feed.edit_time':'Edit time','feed.time_label':'Time','feed.time_save':'Save',
+    'feed.unit':'Unit:','feed.no_amounts':'No amounts set yet','feed.nothing_sel':'Nothing selected',
+    // Costs
+    'costs.empty_horses':'No horses yet.','costs.empty':'No costs logged yet.','costs.total':'Total',
+    'costs.add':'Add cost','costs.amount_ph':'Amount (kr)','costs.date_ph':'Date (DD.MM.YYYY)',
+    'costs.note_ph':'Note (optional)','costs.farrier':'Farrier','costs.vet':'Vet',
+    'costs.feed':'Feed','costs.supplements':'Supplements','costs.show':'Show','costs.other':'Other',
+    // Files
+    'files.empty':'No horses yet.','files.photos':'Photos','files.videos':'Videos',
+    'files.docs':'Documents','files.add_photo':'Add photo','files.add_video':'Add video',
+    'files.add_file':'Add file','files.download':'Download','files.delete':'Delete',
+    // Notes
+    'notes.empty':'No notes yet.','notes.ph':'Write a note...','notes.add':'Add note',
+    // Calendar
+    'cal.nothing':'Nothing scheduled.','cal.add_event':'+ Add event',
+    'cal.months':['January','February','March','April','May','June','July','August','September','October','November','December'],
+    'cal.days':['M','T','W','T','F','S','S'],
+    // Events
+    'ev.add':'Add event','ev.edit':'Edit event','ev.horse_ph':'— Select horse —',
+    'ev.title_ph':'Title (optional)','ev.confirm_add':'Add event','ev.confirm_save':'Save',
+    'ev.delete':'Delete event','ev.farr':'Farrier','ev.vac':'Vaccination','ev.dent':'Dentist',
+    'ev.show':'Show','ev.vet':'Vet','ev.other':'Other',
+    // Users
+    'users.loading':'Loading…','users.your_stable':'Your stable ({n}/5)','users.you':'You',
+    'users.owner':'Owner','users.worker':'Worker','users.remove':'Remove',
+    'users.waiting':'Waiting to join','users.pending':'Pending',
+    'users.full':'Stable full (max 5 users)','users.add':'Add to stable',
+    'users.remove_confirm':'Remove this worker from your stable?',
+    // Import/Export
+    'import.not_backup':'Not a Stablix backup',
+    'import.confirm':'This will replace all your current data with the backup. Continue?',
+    'import.success':'Import successful! All your data has been restored.',
+    'import.error':'Could not read this file. Please select a valid Stablix backup (.json).',
+    'import.too_large':'{name} is too large ({size} MB). Maximum is 50 MB.',
+  },
+  no: {
+    // Auth
+    'auth.tagline':'Stallstyring','auth.signin_tab':'Logg inn','auth.signup_tab':'Registrer deg',
+    'auth.email':'E-post','auth.password':'Passord','auth.password_min':'Passord (min. 6 tegn)',
+    'auth.signing_in':'Logger inn…','auth.signin':'Logg inn','auth.creating':'Oppretter…',
+    'auth.create_account':'Opprett konto','auth.forgot':'Glemt passord?',
+    'auth.forgot_desc':'Skriv inn e-posten din, så sender vi en tilbakestillingslenke.',
+    'auth.send_reset':'Send tilbakestillingslenke','auth.sending':'Sender…',
+    'auth.reset_sent':'Sjekk innboksen — en lenke er på vei.',
+    'auth.gdpr':'Ved å opprette en konto godtar du at e-postadressen din lagres for å gi deg tilgang til Stablix. Data behandles i samsvar med GDPR. Ta kontakt med stalleieren for å be om sletting av konto og data.',
+    'auth.err_fill':'Vennligst fyll inn e-post og passord.','auth.err_pass':'Passordet må være minst 6 tegn.',
+    'auth.err_email':'Vennligst skriv inn e-postadressen din.',
+    'auth.created':'Konto opprettet! Be admin godkjenne tilgangen din, logg deretter inn.',
+    'auth.not_approved':'Ikke godkjent ennå. Be stalleieren legge deg til i Brukere-skjermen.',
+    // Pending
+    'pending.desc':'Opprett din egen stall, eller vent på å bli lagt til i en.',
+    'pending.name':'Stallnavn','pending.create':'Opprett min stall','pending.creating':'Oppretter…',
+    'pending.waiting':'Venter på at en stalleier skal legge deg til. Be dem åpne appen og godkjenne deg i Brukere-skjermen.',
+    'pending.check':'Sjekk godkjenning','pending.signout':'Logg ut',
+    // Nav
+    'nav.home':'Hjem','nav.calendar':'Kalender','nav.horses':'Hester','nav.feeding':'Fôring',
+    'nav.vaccinations':'Vaksinering','nav.farrier':'Hovslager','nav.dentist':'Tannlege',
+    'nav.feeding_plan':'Fôrplan','nav.costs':'Utgifter','nav.files':'Filer',
+    'nav.users':'Brukere','nav.export':'Eksporter data','nav.import':'Importer data','nav.signout':'Logg ut',
+    // Pages
+    'page.horses':'Hester','page.vaccinations':'Vaksinering','page.farrier':'Hovslager',
+    'page.dentist':'Tannlege','page.feeding':'Fôrplan','page.costs':'Utgifter','page.files':'Filer',
+    'page.users':'Brukere','page.health':'Helse','page.activities':'Aktiviteter',
+    'page.notes':'Notater','page.back':'Tilbake',
+    // Horse info
+    'info.dob':'Fødselsdato','info.breed':'Rase','info.sire':'Far','info.dam':'Mor',
+    'info.colour':'Farge','info.last_shod':'Sist skodd','info.last_vac':'Sist vaksinert','info.last_dent':'Siste tannlege',
+    // Horse buttons
+    'horse.activities':'Aktiviteter','horse.health':'Helse','horse.files':'Filer',
+    'horse.feeding':'Fôring','horse.costs':'Utgifter','horse.notes':'Notater',
+    // Horses list
+    'horses.empty':'Ingen hester ennå. Trykk + for å legge til.','horses.add':'Legg til hest',
+    'horses.add_title':'Legg til hest','horses.edit_title':'Rediger hest',
+    'horses.name_ph':'Navn *','horses.breed_ph':'Rase (valgfritt)','horses.colour_ph':'Farge (valgfritt)',
+    'horses.colour_cal':'Farge i kalender','horses.save':'Lagre','horses.delete':'Slett hest',
+    'horses.delete_confirm':'Slette {name}? Dette kan ikke angres.',
+    // Activities
+    'act.add':'Legg til aktivitet','act.note_ph':'Notat (valgfritt)','act.empty':'Ingen aktiviteter ennå.',
+    'act.Flatwork':'Banearbeid','act.Jumping':'Sprangtime','act.Hacking':'Tur','act.Show':'Stevne',
+    'act.Vet check':'Veterinærbesøk','act.Massage':'Massasje','act.Walker':'Skrittemaskin',
+    'act.Pole work':'Cavaletti','act.Treadmill':'Tredemølle','act.Lunging':'Longering','act.Day off':'Fridag',
+    // Health
+    'health.vaccinations':'Vaksinering','health.farrier':'Hovslager','health.dentist':'Tannlege',
+    'health.next':'Neste','health.last_shod':'Sist skodd','health.type':'Type','health.last':'Sist',
+    'health.treatment':'Behandling','health.note':'Notat',
+    // Vaccinations
+    'vac.empty':'Ingen hester ennå.','vac.no_records':'Ingen registreringer','vac.next':'Neste',
+    'vac.add_inline':'+ Legg til','vac.add':'Legg til vaksinering','vac.edit':'Rediger vaksinering',
+    'vac.type_ph':'Type (f.eks. Influensa)','vac.date_label':'Vaksinedato',
+    'vac.next_label':'Neste vaksinering (valgfritt)',
+    'vac.save_add':'Legg til','vac.save_edit':'Lagre','vac.delete':'Slett registrering',
+    // Farrier
+    'farr.empty':'Ingen hester ennå.','farr.last_shod':'Sist skodd','farr.type':'Type',
+    'farr.name':'Hovslager','farr.next':'Neste','farr.modal_title':'Hovslager',
+    'farr.last_label':'Sist skodd','farr.shoe_ph':'Skotype (f.eks. Fullsko)',
+    'farr.name_ph':'Hovslagernavn (valgfritt)','farr.next_label':'Neste time (valgfritt)','farr.save':'Lagre',
+    // Dentist
+    'dent.empty':'Ingen hester ennå.','dent.last':'Siste besøk','dent.treatment':'Behandling',
+    'dent.note':'Notat','dent.name':'Tannlege','dent.next':'Neste','dent.modal_title':'Tannlege',
+    'dent.last_label':'Siste besøk','dent.treatment_ph':'Behandling (valgfritt)',
+    'dent.note_ph':'Notat (valgfritt)','dent.name_ph':'Tannlegenavn (valgfritt)',
+    'dent.next_label':'Neste time (valgfritt)','dent.save':'Lagre',
+    // Feeding
+    'feed.plan':'Fôrplan','feed.back':'Fôrplan',
+    'feed.breakfast':'Morgen','feed.lunch':'Middag','feed.dinner':'Kvelds',
+    'feed.all_horses':'alle hester','feed.section':'Fôr & tilskudd',
+    'feed.nothing':'Ingenting lagt til','feed.add_ph':'Legg til…','feed.add':'Legg til',
+    'feed.empty':'Ingen hester ennå.','feed.hay_label':'Høy','feed.compounds_label':'Kraftfôr',
+    'feed.supplements_label':'Tilskudd','feed.profile_save':'Lagre',
+    'feed.edit_time':'Rediger tid','feed.time_label':'Tid','feed.time_save':'Lagre',
+    'feed.unit':'Enhet:','feed.no_amounts':'Ingen mengder angitt','feed.nothing_sel':'Ingenting valgt',
+    // Costs
+    'costs.empty_horses':'Ingen hester ennå.','costs.empty':'Ingen utgifter registrert.','costs.total':'Totalt',
+    'costs.add':'Legg til utgift','costs.amount_ph':'Beløp (kr)','costs.date_ph':'Dato (DD.MM.ÅÅÅÅ)',
+    'costs.note_ph':'Notat (valgfritt)','costs.farrier':'Hovslager','costs.vet':'Veterinær',
+    'costs.feed':'Fôr','costs.supplements':'Tilskudd','costs.show':'Stevne','costs.other':'Annet',
+    // Files
+    'files.empty':'Ingen hester ennå.','files.photos':'Bilder','files.videos':'Videoer',
+    'files.docs':'Dokumenter','files.add_photo':'Legg til bilde','files.add_video':'Legg til video',
+    'files.add_file':'Legg til fil','files.download':'Last ned','files.delete':'Slett',
+    // Notes
+    'notes.empty':'Ingen notater ennå.','notes.ph':'Skriv et notat...','notes.add':'Legg til notat',
+    // Calendar
+    'cal.nothing':'Ingenting planlagt.','cal.add_event':'+ Legg til hendelse',
+    'cal.months':['Januar','Februar','Mars','April','Mai','Juni','Juli','August','September','Oktober','November','Desember'],
+    'cal.days':['M','T','O','T','F','L','S'],
+    // Events
+    'ev.add':'Legg til hendelse','ev.edit':'Rediger hendelse','ev.horse_ph':'— Velg hest —',
+    'ev.title_ph':'Tittel (valgfritt)','ev.confirm_add':'Legg til hendelse','ev.confirm_save':'Lagre',
+    'ev.delete':'Slett hendelse','ev.farr':'Hovslager','ev.vac':'Vaksinering','ev.dent':'Tannlege',
+    'ev.show':'Stevne','ev.vet':'Veterinær','ev.other':'Annet',
+    // Users
+    'users.loading':'Laster…','users.your_stable':'Din stall ({n}/5)','users.you':'Deg',
+    'users.owner':'Eier','users.worker':'Bruker','users.remove':'Fjern',
+    'users.waiting':'Venter på å bli med','users.pending':'Venter',
+    'users.full':'Stallen er full (maks 5 brukere)','users.add':'Legg til i stall',
+    'users.remove_confirm':'Fjerne denne brukeren fra stallen din?',
+    // Import/Export
+    'import.not_backup':'Ikke en Stablix-sikkerhetskopi',
+    'import.confirm':'Dette vil erstatte all din nåværende data med sikkerhetskopien. Fortsette?',
+    'import.success':'Import vellykket! All dataen din er gjenopprettet.',
+    'import.error':'Kunne ikke lese filen. Velg en gyldig Stablix-sikkerhetskopi (.json).',
+    'import.too_large':'{name} er for stor ({size} MB). Maks er 50 MB.',
+  }
+};
+
+function T(key) {
+  const v = LANG[lang]?.[key];
+  if (v !== undefined) return v;
+  return LANG.en?.[key] ?? key;
+}
+
+function tCostCat(cat) {
+  const map = { Farrier:'costs.farrier', Vet:'costs.vet', Feed:'costs.feed', Supplements:'costs.supplements', Show:'costs.show', Other:'costs.other' };
+  return map[cat] ? T(map[cat]) : cat;
+}
+
+function typeLabel(type) {
+  const map = { farr:'ev.farr', vac:'ev.vac', dent:'ev.dent', show:'ev.show', vet:'ev.vet', other:'ev.other' };
+  return map[type] ? T(map[type]) : type;
+}
+
+function applyLang() {
+  const s = (id, k) => { const e = document.getElementById(id); if (e) e.textContent = T(k); };
+  const p = (id, k) => { const e = document.getElementById(id); if (e) e.placeholder = T(k); };
+  const qs = (sel, k) => { const e = document.querySelector(sel); if (e) e.textContent = T(k); };
+  const qp = (sel, k) => { const e = document.querySelector(sel); if (e) e.placeholder = T(k); };
+
+  document.getElementById('langBtn').textContent = lang === 'en' ? '🇳🇴' : '🇬🇧';
+
+  // Login screen
+  s('auth-tagline', 'auth.tagline');
+  s('tab-login', 'auth.signin_tab');
+  s('tab-signup', 'auth.signup_tab');
+  p('l-email', 'auth.email');
+  p('l-pass', 'auth.password');
+  s('login-submit-btn', 'auth.signin');
+  s('forgot-toggle-btn', 'auth.forgot');
+  s('forgot-desc-text', 'auth.forgot_desc');
+  p('forgot-email', 'auth.email');
+  s('forgot-btn', 'auth.send_reset');
+  p('s-email', 'auth.email');
+  p('s-pass', 'auth.password_min');
+  s('signup-submit-btn', 'auth.create_account');
+  s('auth-gdpr-text', 'auth.gdpr');
+
+  // Pending screen
+  s('pending-desc', 'pending.desc');
+  p('stable-name-input', 'pending.name');
+  s('pending-create-btn', 'pending.create');
+  s('pending-wait-text', 'pending.waiting');
+  s('pending-check-btn', 'pending.check');
+  s('pending-signout-btn', 'pending.signout');
+
+  // Bottom nav
+  s('bn-home-lbl', 'nav.home');
+  s('bn-calendar-lbl', 'nav.calendar');
+  s('bn-horses-lbl', 'nav.horses');
+  s('bn-feeding-lbl', 'nav.feeding');
+
+  // Nav overlay
+  s('nav-home-lbl', 'nav.home');
+  s('nav-calendar-lbl', 'nav.calendar');
+  s('nav-horses-lbl', 'nav.horses');
+  s('nav-vac-lbl', 'nav.vaccinations');
+  s('nav-farr-lbl', 'nav.farrier');
+  s('nav-dent-lbl', 'nav.dentist');
+  s('nav-feed-lbl', 'nav.feeding_plan');
+  s('nav-costs-lbl', 'nav.costs');
+  s('nav-files-lbl', 'nav.files');
+  s('nav-users-lbl', 'nav.users');
+  s('nav-export-lbl', 'nav.export');
+  s('nav-import-lbl', 'nav.import');
+  s('nav-signout-lbl', 'nav.signout');
+
+  // Page headings
+  s('pg-horses-heading', 'page.horses');
+  s('pg-vac-heading', 'page.vaccinations');
+  s('pg-farrier-heading', 'page.farrier');
+  s('pg-dentist-heading', 'page.dentist');
+  s('pg-feeding-heading', 'page.feeding');
+  s('pg-costs-heading', 'page.costs');
+  s('pg-files-heading', 'page.files');
+  s('pg-users-heading', 'page.users');
+  s('pg-health-heading', 'page.health');
+
+  // Back buttons
+  document.querySelectorAll('[data-i18n-back]').forEach(el => { el.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ' ' + T('page.back'); }); });
+  document.querySelectorAll('[data-i18n-feed-back]').forEach(el => { el.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ' ' + T('feed.back'); }); });
+  document.querySelectorAll('[data-i18n-horses-back]').forEach(el => { el.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ' ' + T('page.horses'); }); });
+
+  // Home menu
+  s('home-calendar-lbl', 'nav.calendar');
+  s('home-horses-lbl', 'page.horses');
+  s('home-vac-lbl', 'nav.vaccinations');
+  s('home-farr-lbl', 'nav.farrier');
+  s('home-dent-lbl', 'nav.dentist');
+  s('home-feed-lbl', 'nav.feeding_plan');
+  s('home-costs-lbl', 'nav.costs');
+  s('home-files-lbl', 'nav.files');
+
+  // Horse detail quick buttons
+  s('hq-activities', 'horse.activities');
+  s('hq-health', 'horse.health');
+  s('hq-files', 'horse.files');
+  s('hq-feeding', 'horse.feeding');
+  s('hq-costs', 'horse.costs');
+  s('hq-notes', 'horse.notes');
+
+  // Horse info labels
+  s('hi-dob', 'info.dob');
+  s('hi-breed', 'info.breed');
+  s('hi-sire', 'info.sire');
+  s('hi-dam', 'info.dam');
+  s('hi-colour', 'info.colour');
+  s('hi-last-shod', 'info.last_shod');
+  s('hi-last-vac', 'info.last_vac');
+  s('hi-last-dent', 'info.last_dent');
+
+  // Add horse button
+  s('horses-add-btn-lbl', 'horses.add');
+
+  // Activity modal
+  qs('#actModal .modal-title', 'act.add');
+  p('act-note-input', 'act.note_ph');
+  qs('#actModal .modal-confirm', 'act.add');
+  document.querySelectorAll('#actModal .act-pick[data-type]').forEach(btn => {
+    const span = btn.querySelector('span');
+    if (span) span.textContent = T('act.' + btn.dataset.type);
+  });
+
+  // Horse modal
+  p('hf-name', 'horses.name_ph');
+  qs('#horseModal select#hf-breed option[value=""]', 'horses.breed_ph');
+  qs('#horseModal select#hf-color option[value=""]', 'horses.colour_ph');
+  qs('#horseModal .modal-label', 'horses.colour_cal');
+  qs('#horseModal .modal-confirm', 'horses.save');
+  s('delete-horse-btn', 'horses.delete');
+
+  // Event modal
+  p('ev-title-input', 'ev.title_ph');
+  qs('#eventModal .modal-confirm', 'ev.confirm_add');
+  s('delete-event-btn', 'ev.delete');
+  document.querySelectorAll('#event-type-grid .act-pick[data-type]').forEach(btn => {
+    const span = btn.querySelector('span');
+    if (span) span.textContent = T('ev.' + btn.dataset.type);
+  });
+
+  // Vac modal
+  p('vac-type-input', 'vac.type_ph');
+  qs('#vacModal label[for-key="date"]', 'vac.date_label');
+  qs('#vacModal label[for-key="next"]', 'vac.next_label');
+  s('delete-vac-btn', 'vac.delete');
+
+  // Farrier modal
+  qs('#farrierModal .modal-title', 'farr.modal_title');
+  qs('#farrierModal label[for-key="date"]', 'farr.last_label');
+  p('farr-type-input', 'farr.shoe_ph');
+  p('farr-name-input', 'farr.name_ph');
+  qs('#farrierModal label[for-key="next"]', 'farr.next_label');
+  qs('#farrierModal .modal-confirm', 'farr.save');
+
+  // Dentist modal
+  qs('#dentModal .modal-title', 'dent.modal_title');
+  qs('#dentModal label[for-key="date"]', 'dent.last_label');
+  p('dent-treatment-input', 'dent.treatment_ph');
+  p('dent-note-input', 'dent.note_ph');
+  p('dent-name-input', 'dent.name_ph');
+  qs('#dentModal label[for-key="next"]', 'dent.next_label');
+  qs('#dentModal .modal-confirm', 'dent.save');
+
+  // Cost modal
+  qs('#costModal .modal-title', 'costs.add');
+  p('cost-amount-input', 'costs.amount_ph');
+  p('cost-date-input', 'costs.date_ph');
+  p('cost-note-input', 'costs.note_ph');
+  qs('#costModal .modal-confirm', 'costs.add');
+  document.querySelectorAll('#cost-cat-grid .act-pick[data-cat]').forEach(btn => {
+    btn.textContent = T('costs.' + btn.dataset.cat.toLowerCase());
+  });
+
+  // Feed profile modal
+  document.querySelectorAll('#feedProfileModal .modal-label[data-i18n]').forEach(el => {
+    el.textContent = T(el.dataset.i18n);
+  });
+  qs('#feedProfileModal .modal-confirm', 'feed.profile_save');
+
+  // Meal time modal
+  qs('#mealTimeModal .modal-label', 'feed.time_label');
+  qs('#mealTimeModal .modal-confirm', 'feed.time_save');
+
+  // File viewer modal
+  qs('#fileViewerModal .modal-confirm', 'files.download');
+  qs('#fileViewerModal .btn-delete', 'files.delete');
+
+  // Cal day modal
+  qs('#calDayModal .modal-confirm', 'cal.add_event');
+
+  // Notes
+  p('note-input', 'notes.ph');
+
+  // Calendar weekdays
+  const days = T('cal.days');
+  document.querySelectorAll('.cal-weekdays span').forEach((el, i) => { if (days[i]) el.textContent = days[i]; });
+}
+
+function rerenderCurrentPage() {
+  const active = document.querySelector('.page.active')?.id;
+  if (active === 'pg-horses') renderHorseList();
+  else if (active === 'pg-calendar') renderCalendar();
+  else if (active === 'pg-activities') renderActivities(currentHorseId);
+  else if (active === 'pg-horse-health') renderHorseHealth(currentHorseId);
+  else if (active === 'pg-horse-feeding') renderHorseFeeding(currentHorseId);
+  else if (active === 'pg-horse-costs') renderHorseCosts(currentHorseId);
+  else if (active === 'pg-horse-notes') renderNotes(currentHorseId);
+  else if (active === 'pg-horse-files') renderHorseFiles(currentHorseId);
+  else if (active === 'pg-vaccinations') renderVaccinations();
+  else if (active === 'pg-farrier') renderFarrier();
+  else if (active === 'pg-dentist') renderDentist();
+  else if (active === 'pg-feeding') renderFeedingOverview();
+  else if (active === 'pg-meal') { if (currentMeal) renderMealPage(currentMeal); }
+  else if (active === 'pg-costs') renderCostOverview();
+  else if (active === 'pg-files') renderFilesOverview();
+  else if (active === 'pg-users') renderUsers();
+}
+
+function toggleLang() {
+  lang = lang === 'en' ? 'no' : 'en';
+  localStorage.setItem('stablix_lang', lang);
+  applyLang();
+  rerenderCurrentPage();
 }
 
 // ─── Data layer ───────────────────────────────────────────────────────────────
@@ -1147,10 +1600,13 @@ function toggleDark() {
   localStorage.setItem('stablix_dark', on ? '1' : '0');
 }
 applyDark(localStorage.getItem('stablix_dark') === '1');
+applyLang();
 
 function goBack(page) {
-  document.getElementById('topbarTitle').textContent = 'Stablix';
-  bNav(page, page.charAt(0).toUpperCase() + page.slice(1));
+  const pageKeys = { horses:'page.horses', calendar:'nav.calendar', vaccinations:'page.vaccinations', farrier:'page.farrier', dentist:'page.dentist', feeding:'page.feeding', costs:'page.costs', files:'page.files', users:'page.users', health:'page.health', activities:'page.activities', notes:'page.notes' };
+  const title = pageKeys[page] ? T(pageKeys[page]) : page.charAt(0).toUpperCase() + page.slice(1);
+  document.getElementById('topbarTitle').textContent = title;
+  bNav(page, title);
 }
 
 function handlePlusBtn() {
@@ -1172,7 +1628,7 @@ function renderHorseList() {
   const list = document.getElementById('horses-list');
   const ids = Object.keys(db.horses);
   if (!ids.length) {
-    list.innerHTML = '<p class="empty-state">No horses yet. Tap + to add one.</p>';
+    list.innerHTML = `<p class="empty-state">${T('horses.empty')}</p>`;
     return;
   }
   list.innerHTML = ids.map(id => {
@@ -1232,26 +1688,26 @@ function openActivities() {
 
 function openHorseFeeding() {
   renderHorseFeeding(currentHorseId);
-  document.getElementById('topbarTitle').textContent = 'Feeding';
+  document.getElementById('topbarTitle').textContent = T('horse.feeding');
   showPage('pg-horse-feeding');
 }
 
 function openHorseCosts(id) {
   if (id) currentHorseId = id;
   renderHorseCosts(currentHorseId);
-  document.getElementById('topbarTitle').textContent = 'Costs';
+  document.getElementById('topbarTitle').textContent = T('horse.costs');
   showPage('pg-horse-costs');
 }
 
 function openHorseHealth() {
   renderHorseHealth(currentHorseId);
-  document.getElementById('topbarTitle').textContent = 'Health';
+  document.getElementById('topbarTitle').textContent = T('page.health');
   showPage('pg-horse-health');
 }
 
 function openHorseNotes() {
   renderNotes(currentHorseId);
-  document.getElementById('topbarTitle').textContent = 'Notes';
+  document.getElementById('topbarTitle').textContent = T('page.notes');
   showPage('pg-horse-notes');
 }
 
@@ -1304,25 +1760,25 @@ function renderHorseHealth(id) {
   const v = h.vac || { records: [] };
   const de = h.dent || {};
   document.getElementById('horse-health-content').innerHTML = `
-    <div class="health-section-label">Vaccinations</div>
+    <div class="health-section-label">${T('health.vaccinations')}</div>
     <div class="card"><div class="info-list">
       ${(v.records||[]).map(r=>`<div class="info-row"><span class="info-key">${esc(r.type)}</span><span class="pill ${pillClass(r.date)}">${r.date}</span></div>`).join('')}
-      ${v.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${v.nextDate}</span></div>`:''}
+      ${v.nextDate?`<div class="info-row"><span class="info-key">${T('health.next')}</span><span class="info-val">${v.nextDate}</span></div>`:''}
     </div></div>
-    <div class="health-section-label">Farrier</div>
+    <div class="health-section-label">${T('health.farrier')}</div>
     <div class="card"><div class="info-list">
-      <div class="info-row"><span class="info-key">Last shod</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
-      ${f.type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${esc(f.type)}</span></div>`:''}
-      ${f.farrier?`<div class="info-row"><span class="info-key">Farrier</span><span class="info-val">${esc(f.farrier)}</span></div>`:''}
-      ${f.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${f.nextDate}</span></div>`:''}
+      <div class="info-row"><span class="info-key">${T('health.last_shod')}</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
+      ${f.type?`<div class="info-row"><span class="info-key">${T('health.type')}</span><span class="info-val">${esc(f.type)}</span></div>`:''}
+      ${f.farrier?`<div class="info-row"><span class="info-key">${T('health.farrier')}</span><span class="info-val">${esc(f.farrier)}</span></div>`:''}
+      ${f.nextDate?`<div class="info-row"><span class="info-key">${T('health.next')}</span><span class="info-val">${f.nextDate}</span></div>`:''}
     </div></div>
-    <div class="health-section-label">Dentist</div>
+    <div class="health-section-label">${T('health.dentist')}</div>
     <div class="card"><div class="info-list">
-      <div class="info-row"><span class="info-key">Last</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
-      ${de.treatment?`<div class="info-row"><span class="info-key">Treatment</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
-      ${de.note?`<div class="info-row"><span class="info-key">Note</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
-      ${de.dentist?`<div class="info-row"><span class="info-key">Dentist</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
-      ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
+      <div class="info-row"><span class="info-key">${T('health.last')}</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
+      ${de.treatment?`<div class="info-row"><span class="info-key">${T('health.treatment')}</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
+      ${de.note?`<div class="info-row"><span class="info-key">${T('health.note')}</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
+      ${de.dentist?`<div class="info-row"><span class="info-key">${T('health.dentist')}</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
+      ${de.nextDate?`<div class="info-row"><span class="info-key">${T('health.next')}</span><span class="info-val">${de.nextDate}</span></div>`:''}
     </div></div>`;
 }
 
@@ -1345,13 +1801,13 @@ const ACT_STYLE = {
 function renderActivities(horseId) {
   const acts = db.horses[horseId]?.activities || [];
   const cont = document.getElementById('activities-list');
-  if (!acts.length) { cont.innerHTML = '<p class="empty-state">No activities yet.</p>'; return; }
+  if (!acts.length) { cont.innerHTML = `<p class="empty-state">${T('act.empty')}</p>`; return; }
   const grouped = {};
   acts.forEach(a => { (grouped[a.date] = grouped[a.date]||[]).push(a); });
   cont.innerHTML = Object.keys(grouped).map(date => {
     const items = grouped[date].map(a => {
       const s = ACT_STYLE[a.type] || { cls:'act-walk', icon:'' };
-      return `<div class="act-item"><div class="act-icon ${s.cls}"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">${s.icon}</svg></div><div><div class="act-name">${esc(a.type)}</div><div class="act-sub">${esc(a.note||'')}</div></div></div>`;
+      return `<div class="act-item"><div class="act-icon ${s.cls}"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">${s.icon}</svg></div><div><div class="act-name">${esc(T('act.' + a.type) || a.type)}</div><div class="act-sub">${esc(a.note||'')}</div></div></div>`;
     }).join('');
     return `<div class="act-date-label">${date}</div>${items}`;
   }).join('');
@@ -1361,13 +1817,13 @@ function renderActivities(horseId) {
 
 function renderFeedingOverview() {
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
-  const meals = [['Breakfast','breakfast'],['Lunch','lunch'],['Dinner','dinner']];
-  const mealBtns = meals.map(([label, key]) => `
+  const meals = [['feed.breakfast','breakfast'],['feed.lunch','lunch'],['feed.dinner','dinner']];
+  const mealBtns = meals.map(([labelKey, key]) => `
     <button class="meal-btn" onclick="openMeal('${key}')">
       <div>
-        <div class="meal-btn-name">${label}</div>
+        <div class="meal-btn-name">${T(labelKey)}</div>
         <div class="meal-btn-sub">
-          ${mt[key]} · all horses
+          ${mt[key]} · ${T('feed.all_horses')}
           <span class="meal-time-edit" onclick="event.stopPropagation();editMealTime('${key}')">
             <svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle;margin-left:5px;stroke:var(--ink3);fill:none;stroke-width:2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </span>
@@ -1388,21 +1844,21 @@ function renderFeedingOverview() {
           (fp.supplements||[]).forEach(x => { if (x[key]) parts.push(esc(x.name)+' '+x[key]+'g'); });
           return parts.join(' · ');
         };
-        const rows = [['Breakfast','breakfast'],['Lunch','lunch'],['Dinner','dinner']]
-          .map(([label,key]) => { const line = mealLine(key); return line ? `<div style="font-size:12px;color:var(--ink2);margin-bottom:2px;"><span style="font-weight:600;color:var(--ink3);">${label}: </span>${line}</div>` : ''; })
+        const rows = [['feed.breakfast','breakfast'],['feed.lunch','lunch'],['feed.dinner','dinner']]
+          .map(([labelKey,key]) => { const line = mealLine(key); return line ? `<div style="font-size:12px;color:var(--ink2);margin-bottom:2px;"><span style="font-weight:600;color:var(--ink3);">${T(labelKey)}: </span>${line}</div>` : ''; })
           .join('');
         const hasItems = (fp.hay||[]).length||(fp.compounds||[]).length||(fp.supplements||[]).length;
-        const body = rows || `<span style="font-size:12px;color:var(--ink3);">${hasItems?'No amounts set yet':'Nothing selected'}</span>`;
+        const body = rows || `<span style="font-size:12px;color:var(--ink3);">${hasItems?T('feed.no_amounts'):T('feed.nothing_sel')}</span>`;
         return `<div class="feed-horse-row" onclick="openFeedProfile('${h.id}')">
           <div class="feed-horse-row-name">${esc(h.name)}</div>
           <div style="margin-top:3px;">${body}</div>
         </div>`;
       }).join('')
-    : `<div style="padding:14px;font-size:13px;color:var(--ink3);">No horses yet.</div>`;
+    : `<div style="padding:14px;font-size:13px;color:var(--ink3);">${T('feed.empty')}</div>`;
 
   document.getElementById('feeding-list').innerHTML =
     mealBtns +
-    `<div class="feed-section-head" style="margin-top:20px;">Feed &amp; Supplements</div>` +
+    `<div class="feed-section-head" style="margin-top:20px;">${T('feed.section')}</div>` +
     `<div class="card">${horseRows}</div>`;
 }
 
@@ -1457,7 +1913,7 @@ function renderAmounts(section, defaultUnit) {
     const u = prev[name+'_u'] !== undefined ? prev[name+'_u'] : (stored.unit || defaultUnit);
 
     const unitRow = isCompound ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-      <span style="font-size:11px;color:var(--ink3);">Unit:</span>
+      <span style="font-size:11px;color:var(--ink3);">${T('feed.unit')}</span>
       <button type="button" class="unit-btn${u==='L'?' ut-sel':''}" onclick="switchFeedUnit(this,'${section}')">L</button>
       <button type="button" class="unit-btn${u==='kg'?' ut-sel':''}" onclick="switchFeedUnit(this,'${section}')">kg</button>
       <input type="hidden" data-key="${name}_u" value="${u}">
@@ -1468,9 +1924,9 @@ function renderAmounts(section, defaultUnit) {
       <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${esc(name)}</div>
       ${unitRow}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-        ${[['Breakfast','b'],['Lunch','l'],['Dinner','d']].map(([label,sfx]) => `
+        ${[['feed.breakfast','b'],['feed.lunch','l'],['feed.dinner','d']].map(([labelKey,sfx]) => `
           <div>
-            <div style="font-size:10px;color:var(--ink3);margin-bottom:3px;">${label}</div>
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:3px;">${T(labelKey)}</div>
             <div style="display:flex;align-items:center;gap:2px;">
               <input class="modal-input" type="number" data-key="${name}_${sfx}" value="${get(sfx)}"
                 inputmode="decimal" placeholder="—"
@@ -1516,8 +1972,8 @@ function saveFeedProfile() {
 let _editingMealKey = null;
 function editMealTime(meal) {
   _editingMealKey = meal;
-  const labels = {breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner'};
-  document.getElementById('mealTimeModal-title').textContent = labels[meal] + ' – set time';
+  const labels = {breakfast:'feed.breakfast', lunch:'feed.lunch', dinner:'feed.dinner'};
+  document.getElementById('mealTimeModal-title').textContent = T(labels[meal]) + ' – ' + T('feed.edit_time');
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
   document.getElementById('mealtime-input').value = mt[meal];
   openModal('mealTimeModal');
@@ -1540,10 +1996,10 @@ function _feedItemRow(item, idx, removeCall) {
 }
 function _feedAddRow(inputId, addCall) {
   return `<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
-    <input class="modal-input" type="text" id="${inputId}" placeholder="Add item…"
+    <input class="modal-input" type="text" id="${inputId}" placeholder="${T('feed.add_ph')}"
       style="flex:1;margin:0;padding:8px 10px;font-size:14px;"
       onkeydown="if(event.key==='Enter')${addCall}">
-    <button class="add-inline-btn" onclick="${addCall}">Add</button>
+    <button class="add-inline-btn" onclick="${addCall}">${T('feed.add')}</button>
   </div>`;
 }
 
@@ -1560,14 +2016,14 @@ function renderHorseFeeding(horseId) {
   const h = db.horses[horseId];
   const f = h?.feeding || {};
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
-  const meals = [['Breakfast', mt.breakfast, 'breakfast'],['Lunch', mt.lunch, 'lunch'],['Dinner', mt.dinner, 'dinner']];
-  document.getElementById('horse-feeding-content').innerHTML = meals.map(([label, time, key]) => {
+  const meals = [['feed.breakfast', mt.breakfast, 'breakfast'],['feed.lunch', mt.lunch, 'lunch'],['feed.dinner', mt.dinner, 'dinner']];
+  document.getElementById('horse-feeding-content').innerHTML = meals.map(([labelKey, time, key]) => {
     const profileRows = _profileRowsForMeal(h, key);
     const items = f[key] || [];
     const manualRows = items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${horseId}','${key}',${idx});renderHorseFeeding('${horseId}')`)).join('');
-    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>` : '';
+    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">${T('feed.nothing')}</div>` : '';
     return `<div class="horse-meal-block">
-      <div class="horse-meal-name">${label} · ${time}</div>
+      <div class="horse-meal-name">${T(labelKey)} · ${time}</div>
       ${profileRows}${manualRows}${empty}
       ${_feedAddRow('feed-h-'+key, `addFeedItemFromHorse('${horseId}','${key}')`)}
     </div>`;
@@ -1576,21 +2032,21 @@ function renderHorseFeeding(horseId) {
 
 function openMeal(meal) {
   currentMeal = meal;
-  const labels = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner' };
+  const labels = { breakfast:'feed.breakfast', lunch:'feed.lunch', dinner:'feed.dinner' };
   const mt = db.mealTimes || {breakfast:'07:00', lunch:'12:00', dinner:'18:00'};
-  document.getElementById('meal-title').textContent = labels[meal] + ' · ' + mt[meal];
+  document.getElementById('meal-title').textContent = T(labels[meal]) + ' · ' + mt[meal];
   renderMealPage(meal);
   showPage('pg-meal');
 }
 
 function renderMealPage(meal) {
   const horses = Object.values(db.horses);
-  if (!horses.length) { document.getElementById('meal-content').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  if (!horses.length) { document.getElementById('meal-content').innerHTML = `<p class="empty-state">${T('feed.empty')}</p>`; return; }
   document.getElementById('meal-content').innerHTML = horses.map(h => {
     const profileRows = _profileRowsForMeal(h, meal);
     const items = h.feeding?.[meal] || [];
     const manualRows = items.map((item, idx) => _feedItemRow(item, idx, `removeFeedItem('${h.id}','${meal}',${idx});renderMealPage('${meal}')`)).join('');
-    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">Nothing added yet</div>` : '';
+    const empty = !profileRows && !manualRows ? `<div class="horse-meal-item" style="color:var(--ink3);">${T('feed.nothing')}</div>` : '';
     return `<div class="horse-meal-block">
       <div class="horse-meal-name">${esc(h.name)}</div>
       ${profileRows}${manualRows}${empty}
@@ -1603,7 +2059,7 @@ function renderMealPage(meal) {
 
 function renderVaccinations() {
   const horses = Object.values(db.horses);
-  if (!horses.length) { document.getElementById('vac-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  if (!horses.length) { document.getElementById('vac-list').innerHTML = `<p class="empty-state">${T('vac.empty')}</p>`; return; }
   document.getElementById('vac-list').innerHTML = horses.map(h => {
     const recs = h.vac?.records || [];
     const next = h.vac?.nextDate;
@@ -1615,15 +2071,15 @@ function renderVaccinations() {
             <button class="cal-del-btn" style="margin-left:0;" onclick="event.stopPropagation();deleteVacRecAndRender('${h.id}','${r.id}')">×</button>
           </span>
         </div>`).join('')
-      : `<div class="info-row"><span class="info-key" style="color:var(--ink3);">No records yet</span></div>`;
+      : `<div class="info-row"><span class="info-key" style="color:var(--ink3);">${T('vac.no_records')}</span></div>`;
     return `<div class="card" style="margin-bottom:10px;">
       <div class="overview-horse-hd" style="display:flex;align-items:center;justify-content:space-between;">
         <span>${esc(h.name)}</span>
-        <button class="add-inline-btn" onclick="openVacModal('${h.id}')">+ Add</button>
+        <button class="add-inline-btn" onclick="openVacModal('${h.id}')">${T('vac.add_inline')}</button>
       </div>
       <div class="info-list">
         ${recsHtml}
-        ${next ? `<div class="info-row"><span class="info-key">Next</span><span class="info-val">${next}</span></div>` : ''}
+        ${next ? `<div class="info-row"><span class="info-key">${T('vac.next')}</span><span class="info-val">${next}</span></div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1631,16 +2087,16 @@ function renderVaccinations() {
 
 function renderFarrier() {
   const horses = Object.values(db.horses);
-  if (!horses.length) { document.getElementById('farrier-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  if (!horses.length) { document.getElementById('farrier-list').innerHTML = `<p class="empty-state">${T('farr.empty')}</p>`; return; }
   document.getElementById('farrier-list').innerHTML = horses.map(h => {
     const f = h.farrier || {};
     return `<div class="card card-tap" style="margin-bottom:10px;" onclick="openFarrierModal('${h.id}')">
       <div class="overview-horse-hd">${esc(h.name)}</div>
       <div class="info-list">
-        <div class="info-row"><span class="info-key">Last shod</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
-        ${f.type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${esc(f.type)}</span></div>`:''}
-        ${f.farrier?`<div class="info-row"><span class="info-key">Farrier</span><span class="info-val">${esc(f.farrier)}</span></div>`:''}
-        ${f.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${f.nextDate}</span></div>`:''}
+        <div class="info-row"><span class="info-key">${T('farr.last_shod')}</span><span class="pill ${pillClass(f.lastDate)}">${f.lastDate||'—'}</span></div>
+        ${f.type?`<div class="info-row"><span class="info-key">${T('farr.type')}</span><span class="info-val">${esc(f.type)}</span></div>`:''}
+        ${f.farrier?`<div class="info-row"><span class="info-key">${T('farr.name')}</span><span class="info-val">${esc(f.farrier)}</span></div>`:''}
+        ${f.nextDate?`<div class="info-row"><span class="info-key">${T('farr.next')}</span><span class="info-val">${f.nextDate}</span></div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1648,17 +2104,17 @@ function renderFarrier() {
 
 function renderDentist() {
   const horses = Object.values(db.horses);
-  if (!horses.length) { document.getElementById('dentist-list').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  if (!horses.length) { document.getElementById('dentist-list').innerHTML = `<p class="empty-state">${T('dent.empty')}</p>`; return; }
   document.getElementById('dentist-list').innerHTML = horses.map(h => {
     const de = h.dent || {};
     return `<div class="card card-tap" style="margin-bottom:10px;" onclick="openDentistModal('${h.id}')">
       <div class="overview-horse-hd">${esc(h.name)}</div>
       <div class="info-list">
-        <div class="info-row"><span class="info-key">Last visit</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
-        ${de.treatment?`<div class="info-row"><span class="info-key">Treatment</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
-        ${de.note?`<div class="info-row"><span class="info-key">Note</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
-        ${de.dentist?`<div class="info-row"><span class="info-key">Dentist</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
-        ${de.nextDate?`<div class="info-row"><span class="info-key">Next</span><span class="info-val">${de.nextDate}</span></div>`:''}
+        <div class="info-row"><span class="info-key">${T('dent.last')}</span><span class="pill ${pillClass(de.lastDate)}">${de.lastDate||'—'}</span></div>
+        ${de.treatment?`<div class="info-row"><span class="info-key">${T('dent.treatment')}</span><span class="info-val">${esc(de.treatment)}</span></div>`:''}
+        ${de.note?`<div class="info-row"><span class="info-key">${T('dent.note')}</span><span class="info-val" style="white-space:pre-wrap;">${esc(de.note)}</span></div>`:''}
+        ${de.dentist?`<div class="info-row"><span class="info-key">${T('dent.name')}</span><span class="info-val">${esc(de.dentist)}</span></div>`:''}
+        ${de.nextDate?`<div class="info-row"><span class="info-key">${T('dent.next')}</span><span class="info-val">${de.nextDate}</span></div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1678,7 +2134,7 @@ function renderCostOverview() {
         <div class="chevron"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
     </div>`;
-  }).join('') || '<p class="empty-state">No horses yet.</p>';
+  }).join('') || `<p class="empty-state">${T('costs.empty_horses')}</p>`;
 }
 
 function renderHorseCosts(id) {
@@ -1686,16 +2142,16 @@ function renderHorseCosts(id) {
   const costs = h.costs || [];
   document.getElementById('horse-costs-name').textContent = h.name;
   if (!costs.length) {
-    document.getElementById('horse-costs-list').innerHTML = '<p class="empty-state">No costs logged yet.</p>';
+    document.getElementById('horse-costs-list').innerHTML = `<p class="empty-state">${T('costs.empty')}</p>`;
     return;
   }
   const total = costs.reduce((s,c) => s + Number(c.amount||0), 0);
   document.getElementById('horse-costs-list').innerHTML = `<div class="card"><div class="info-list">
     ${costs.map(c=>`<div class="info-row">
-      <span class="info-key">${c.date||'—'}<br><small style="font-size:10px;color:var(--ink3);">${esc(c.category||'')}${c.note?' · '+esc(c.note):''}</small></span>
+      <span class="info-key">${c.date||'—'}<br><small style="font-size:10px;color:var(--ink3);">${esc(tCostCat(c.category||''))}${c.note?' · '+esc(c.note):''}</small></span>
       <span class="info-val">${Number(c.amount||0).toLocaleString('nb-NO')} kr</span>
     </div>`).join('')}
-    <div class="info-row" style="border-top:1px solid var(--border-strong);"><span class="info-key" style="font-weight:600;">Total</span><span class="info-val" style="font-weight:700;">${total.toLocaleString('nb-NO')} kr</span></div>
+    <div class="info-row" style="border-top:1px solid var(--border-strong);"><span class="info-key" style="font-weight:600;">${T('costs.total')}</span><span class="info-val" style="font-weight:700;">${total.toLocaleString('nb-NO')} kr</span></div>
   </div></div>`;
 }
 
@@ -1707,7 +2163,7 @@ function renderNotes(id) {
   const notes = h.notes || [];
   document.getElementById('horse-notes-list').innerHTML = notes.length
     ? `<div class="card">${notes.map(n=>`<div class="note-item"><div class="note-date">${n.date}</div><div class="note-text">${esc(n.text)}</div></div>`).join('')}</div>`
-    : '<p class="empty-state">No notes yet.</p>';
+    : `<p class="empty-state">${T('notes.empty')}</p>`;
 }
 
 function saveNote() {
@@ -1735,7 +2191,7 @@ function deleteFile(horseId, fileId) {
 
 function renderFilesOverview() {
   const horses = Object.values(db.horses);
-  if (!horses.length) { document.getElementById('files-overview').innerHTML = '<p class="empty-state">No horses yet.</p>'; return; }
+  if (!horses.length) { document.getElementById('files-overview').innerHTML = `<p class="empty-state">${T('files.empty')}</p>`; return; }
   document.getElementById('files-overview').innerHTML = horses.map(h => {
     const count = (h.files||[]).length;
     const avatar = h.photo
@@ -1758,7 +2214,7 @@ function openHorseFiles(id) {
   filesBackTo = 'pg-files';
   const h = db.horses[id];
   document.getElementById('horse-files-name').textContent = h.name;
-  document.getElementById('topbarTitle').textContent = 'Files';
+  document.getElementById('topbarTitle').textContent = T('page.files');
   renderHorseFiles(id);
   showPage('pg-horse-files');
 }
@@ -1767,7 +2223,7 @@ function openHorseFilesFromHorse() {
   filesBackTo = 'pg-horse';
   const h = db.horses[currentHorseId];
   document.getElementById('horse-files-name').textContent = h.name;
-  document.getElementById('topbarTitle').textContent = 'Files';
+  document.getElementById('topbarTitle').textContent = T('page.files');
   renderHorseFiles(currentHorseId);
   showPage('pg-horse-files');
 }
@@ -1777,7 +2233,7 @@ function goBackFromFiles() {
     document.getElementById('topbarTitle').textContent = db.horses[currentHorseId]?.name?.split(' ')[0] || 'Stablix';
     showPage('pg-horse');
   } else {
-    bNav('files', 'Files');
+    bNav('files', T('page.files'));
   }
 }
 
@@ -1816,9 +2272,9 @@ function renderHorseFiles(horseId) {
      </div></div>`;
 
   document.getElementById('horse-files-content').innerHTML =
-    section('Photos',    images, 'image',    'Add photo') +
-    section('Videos',    videos, 'video',    'Add video') +
-    section('Documents', docs,   'document', 'Add file');
+    section(T('files.photos'),  images, 'image',    T('files.add_photo')) +
+    section(T('files.videos'),  videos, 'video',    T('files.add_video')) +
+    section(T('files.docs'),    docs,   'document', T('files.add_file'));
 }
 
 let pendingFileType = 'any';
@@ -1859,7 +2315,7 @@ function handleFileUpload(input) {
       reader.readAsDataURL(file);
     } else {
       if (file.size > 50 * 1024 * 1024) {
-        alert(`"${file.name}" is too large (${(file.size/1024/1024).toFixed(0)} MB). Maximum is 50 MB.`);
+        alert(T('import.too_large').replace('{name}', file.name).replace('{size}', (file.size/1024/1024).toFixed(0)));
         return;
       }
       const reader = new FileReader();
@@ -1927,7 +2383,7 @@ function calPrevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear
 function calNextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
 
 function renderCalendar() {
-  document.getElementById('cal-nav-title').textContent = NO_MONTHS[calMonth] + ' ' + calYear;
+  document.getElementById('cal-nav-title').textContent = T('cal.months')[calMonth] + ' ' + calYear;
   const today = new Date();
   const firstDow = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
   const startCol = (firstDow + 6) % 7; // Mon=0
@@ -1973,7 +2429,7 @@ function openDayDetail(dateStr) {
   _calDetailDate = dateStr;
   const d = parseDMY(dateStr);
   document.getElementById('calDay-title').textContent = d
-    ? d.getDate() + '. ' + NO_MONTHS[d.getMonth()] + ' ' + d.getFullYear() : dateStr;
+    ? d.getDate() + '. ' + T('cal.months')[d.getMonth()] + ' ' + d.getFullYear() : dateStr;
   renderDayDetail(dateStr);
   openModal('calDayModal');
 }
@@ -1984,7 +2440,7 @@ function renderDayDetail(dateStr) {
   let html = '';
   dayEvents.forEach(e => {
     const dot = DOT_CLASS[e.type] || 'dot-other';
-    const label = e.title || TYPE_LABEL[e.type] || e.type;
+    const label = e.title || typeLabel(e.type) || e.type;
     html += `<div class="cal-event-item" onclick="closeModal('calDayModal');openEditEvent('${e.id}')">
       <span class="cal-dot ${dot}"></span>
       <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(label)}</div><div class="cal-ev-horse">${esc(e.horse||'')}</div></div>
@@ -1994,10 +2450,10 @@ function renderDayDetail(dateStr) {
   dayActs.forEach(({h, a}) => {
     html += `<div class="cal-event-item">
       <span class="cal-dot" style="background:${h.calColor||'#3498db'};"></span>
-      <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(a.type)}</div><div class="cal-ev-horse">${esc(h.name)}${a.note?' · '+esc(a.note):''}</div></div>
+      <div style="flex:1;min-width:0;"><div class="cal-ev-name">${esc(T('act.' + a.type) || a.type)}</div><div class="cal-ev-horse">${esc(h.name)}${a.note?' · '+esc(a.note):''}</div></div>
     </div>`;
   });
-  if (!html) html = '<p class="empty-state" style="margin:8px 0 12px;">Nothing scheduled.</p>';
+  if (!html) html = `<p class="empty-state" style="margin:8px 0 12px;">${T('cal.nothing')}</p>`;
   document.getElementById('calDay-content').innerHTML = html;
 }
 
@@ -2018,7 +2474,7 @@ function pickAct(btn) { document.querySelectorAll('.act-pick').forEach(b=>b.clas
 function confirmActivity() {
   const sel = document.querySelector('#actModal .act-pick.sel');
   if (!sel || !currentHorseId) return;
-  addActivity(currentHorseId, { type: sel.textContent.trim(), note: document.getElementById('act-note-input').value.trim(), date: todayStr() });
+  addActivity(currentHorseId, { type: sel.dataset.type || sel.textContent.trim(), note: document.getElementById('act-note-input').value.trim(), date: todayStr() });
   document.getElementById('act-note-input').value = '';
   document.querySelectorAll('#actModal .act-pick').forEach(b=>b.classList.remove('sel'));
   closeModal('actModal');
@@ -2041,7 +2497,7 @@ function pickHorseCalColor(btn) {
 
 function openAddHorse() {
   editingHorseId = null;
-  document.getElementById('horse-modal-title').textContent = 'Add horse';
+  document.getElementById('horse-modal-title').textContent = T('horses.add_title');
   ['hf-name','hf-breed','hf-born','hf-sire','hf-dam','hf-color'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('delete-horse-btn').style.display = 'none';
   renderCalColorPicker(CAL_COLORS[Object.keys(db.horses).length % CAL_COLORS.length]);
@@ -2051,7 +2507,7 @@ function openEditHorse() {
   if (!currentHorseId) return;
   editingHorseId = currentHorseId;
   const h = db.horses[currentHorseId];
-  document.getElementById('horse-modal-title').textContent = 'Edit horse';
+  document.getElementById('horse-modal-title').textContent = T('horses.edit_title');
   document.getElementById('hf-name').value = h.name || '';
   document.getElementById('hf-breed').value = h.breed || '';
   document.getElementById('hf-born').value = h.born ? dmyToIso(h.born) : '';
@@ -2085,10 +2541,10 @@ function confirmHorse() {
   }
 }
 function confirmDeleteHorse() {
-  if (!confirm('Delete ' + db.horses[editingHorseId]?.name + '? This cannot be undone.')) return;
+  if (!confirm(T('horses.delete_confirm').replace('{name}', db.horses[editingHorseId]?.name))) return;
   deleteHorse(editingHorseId);
   closeModal('horseModal');
-  bNav('horses', 'Horses');
+  bNav('horses', T('page.horses'));
 }
 
 // Event modal
@@ -2096,7 +2552,7 @@ let editingEventId = null;
 
 function _fillEventModal(e) {
   const sel = document.getElementById('ev-horse-input');
-  sel.innerHTML = '<option value="">— Select horse —</option>' +
+  sel.innerHTML = `<option value="">${T('ev.horse_ph')}</option>` +
     Object.values(db.horses).map(h =>
       `<option value="${esc(h.name)}"${e && e.horse === h.name ? ' selected' : ''}>${esc(h.name)}</option>`
     ).join('');
@@ -2111,8 +2567,8 @@ function openEventModal(prefillDmy) {
   editingEventId = null;
   _fillEventModal(null);
   if (prefillDmy) document.getElementById('ev-date-input').value = dmyToIso(prefillDmy);
-  document.getElementById('event-modal-title').textContent = 'Add event';
-  document.getElementById('event-modal-confirm').textContent = 'Add event';
+  document.getElementById('event-modal-title').textContent = T('ev.add');
+  document.getElementById('event-modal-confirm').textContent = T('ev.confirm_add');
   document.getElementById('delete-event-btn').style.display = 'none';
   openModal('eventModal');
 }
@@ -2122,8 +2578,8 @@ function openEditEvent(id) {
   if (!e) return;
   editingEventId = id;
   _fillEventModal(e);
-  document.getElementById('event-modal-title').textContent = 'Edit event';
-  document.getElementById('event-modal-confirm').textContent = 'Save';
+  document.getElementById('event-modal-title').textContent = T('ev.edit');
+  document.getElementById('event-modal-confirm').textContent = T('ev.confirm_save');
   document.getElementById('delete-event-btn').style.display = 'block';
   openModal('eventModal');
 }
@@ -2178,8 +2634,8 @@ function openVacModal(horseId) {
   editingVacHorseId = null;
   editingVacRecId = null;
   _fillVacModal(horseId, null);
-  document.getElementById('vac-modal-title').textContent = 'Add vaccination';
-  document.getElementById('vac-modal-confirm').textContent = 'Add';
+  document.getElementById('vac-modal-title').textContent = T('vac.add');
+  document.getElementById('vac-modal-confirm').textContent = T('vac.save_add');
   document.getElementById('delete-vac-btn').style.display = 'none';
   openModal('vacModal');
 }
@@ -2190,8 +2646,8 @@ function openEditVacRec(horseId, recId) {
   editingVacHorseId = horseId;
   editingVacRecId = recId;
   _fillVacModal(horseId, rec);
-  document.getElementById('vac-modal-title').textContent = 'Edit vaccination';
-  document.getElementById('vac-modal-confirm').textContent = 'Save';
+  document.getElementById('vac-modal-title').textContent = T('vac.edit');
+  document.getElementById('vac-modal-confirm').textContent = T('vac.save_edit');
   document.getElementById('delete-vac-btn').style.display = 'block';
   openModal('vacModal');
 }
@@ -2293,7 +2749,7 @@ function confirmCost() {
   const amount = document.getElementById('cost-amount-input').value.trim();
   if (!sel || !amount || !currentHorseId) return;
   addCost(currentHorseId, {
-    category: sel.textContent.trim(),
+    category: sel.dataset.cat || sel.textContent.trim(),
     amount: parseFloat(amount),
     date: document.getElementById('cost-date-input').value.trim() || todayStr(),
     note: document.getElementById('cost-note-input').value.trim()
@@ -2339,15 +2795,15 @@ function handleImport(input) {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!data.horses) throw new Error('Not a Stablix backup');
-      if (!confirm('This will replace all your current data with the backup. Continue?')) return;
+      if (!data.horses) throw new Error(T('import.not_backup'));
+      if (!confirm(T('import.confirm'))) return;
       db = data;
       saveData();
       closeNav();
       bNav('home', 'Stablix');
-      alert('Import successful! All your data has been restored.');
+      alert(T('import.success'));
     } catch(e) {
-      alert('Could not read this file. Please select a valid Stablix backup (.json).');
+      alert(T('import.error'));
     }
   };
   reader.readAsText(file);
@@ -2374,14 +2830,14 @@ function toggleForgot() {
 
 async function doForgotPassword() {
   const email = document.getElementById('forgot-email').value.trim();
-  if (!email) { showAuthError('Please enter your email address.'); return; }
+  if (!email) { showAuthError(T('auth.err_email')); return; }
   const btn = document.getElementById('forgot-btn');
-  btn.textContent = 'Sending…'; btn.disabled = true;
+  btn.textContent = T('auth.sending'); btn.disabled = true;
   const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-  btn.textContent = 'Send reset link'; btn.disabled = false;
+  btn.textContent = T('auth.send_reset'); btn.disabled = false;
   if (error) { showAuthError(error.message); return; }
   const msg = document.getElementById('forgot-msg');
-  msg.textContent = 'Check your inbox — a reset link is on its way.';
+  msg.textContent = T('auth.reset_sent');
   msg.style.display = '';
   document.getElementById('auth-error').style.display = 'none';
 }
@@ -2395,26 +2851,26 @@ function showAuthError(msg) {
 async function doLogin() {
   const email = document.getElementById('l-email').value.trim();
   const pass = document.getElementById('l-pass').value;
-  if (!email || !pass) { showAuthError('Please enter email and password.'); return; }
+  if (!email || !pass) { showAuthError(T('auth.err_fill')); return; }
   const btn = document.querySelector('#form-login .modal-confirm');
-  btn.textContent = 'Signing in…'; btn.disabled = true;
+  btn.textContent = T('auth.signing_in'); btn.disabled = true;
   const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = 'Sign in'; btn.disabled = false;
+  btn.textContent = T('auth.signin'); btn.disabled = false;
   if (error) showAuthError(error.message);
 }
 
 async function doSignup() {
   const email = document.getElementById('s-email').value.trim();
   const pass = document.getElementById('s-pass').value;
-  if (!email || !pass) { showAuthError('Please enter email and password.'); return; }
-  if (pass.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  if (!email || !pass) { showAuthError(T('auth.err_fill')); return; }
+  if (pass.length < 6) { showAuthError(T('auth.err_pass')); return; }
   const btn = document.querySelector('#form-signup .modal-confirm');
-  btn.textContent = 'Creating…'; btn.disabled = true;
+  btn.textContent = T('auth.creating'); btn.disabled = true;
   const { data, error } = await _sb.auth.signUp({ email, password: pass });
-  btn.textContent = 'Create account'; btn.disabled = false;
+  btn.textContent = T('auth.create_account'); btn.disabled = false;
   if (error) { showAuthError(error.message); return; }
   if (!data.session) {
-    document.getElementById('form-signup').innerHTML = '<div class="auth-msg">Account created! Ask the admin to approve your access, then sign in.</div>';
+    document.getElementById('form-signup').innerHTML = `<div class="auth-msg">${T('auth.created')}</div>`;
     document.getElementById('auth-error').style.display = 'none';
   }
 }
@@ -2496,9 +2952,9 @@ _sb.auth.onAuthStateChange(async (event, session) => {
 
 async function doCreateStable() {
   const name = document.getElementById('stable-name-input').value.trim();
-  if (!name) { alert('Please enter a stable name.'); return; }
+  if (!name) { alert(T('pending.name') + '?'); return; }
   const btn = document.querySelector('#pending-screen .modal-confirm');
-  btn.textContent = 'Creating…'; btn.disabled = true;
+  btn.textContent = T('pending.creating'); btn.disabled = true;
   try {
     await sbRpc('create_stable', { stable_name: name });
     currentProfile = await loadProfile(currentUser.id);
@@ -2506,19 +2962,19 @@ async function doCreateStable() {
   } catch (e) {
     alert('Failed: ' + e.message);
   } finally {
-    btn.textContent = 'Create my stable'; btn.disabled = false;
+    btn.textContent = T('pending.create'); btn.disabled = false;
   }
 }
 
 async function doCheckApproval() {
   currentProfile = await loadProfile(currentUser.id);
   if (currentProfile?.stable_id) await showApp();
-  else alert('Not approved yet. Ask the stable owner to add you in their Users screen.');
+  else alert(T('auth.not_approved'));
 }
 
 async function renderUsers() {
   const list = document.getElementById('users-list');
-  list.innerHTML = '<p class="empty-state" style="padding:8px 0;">Loading…</p>';
+  list.innerHTML = `<p class="empty-state" style="padding:8px 0;">${T('users.loading')}</p>`;
   const stableId = currentProfile?.stable_id;
   const [members, pending] = await Promise.all([
     sbGet('profiles', `stable_id=eq.${stableId}&order=created_at`),
@@ -2527,31 +2983,31 @@ async function renderUsers() {
   const memberCount = members?.length || 0;
   const atMax = memberCount >= 5;
   let html = '';
-  html += `<div class="section-label">Your stable (${memberCount}/5)</div>`;
+  html += `<div class="section-label">${T('users.your_stable').replace('{n}', memberCount)}</div>`;
   html += (members || []).map(u => {
     const isMe = u.id === currentUser?.id;
-    const roleLabel = u.role === 'owner' ? 'Owner' : 'Worker';
+    const roleLabel = u.role === 'owner' ? T('users.owner') : T('users.worker');
     const rolePill = u.role === 'owner' ? 'pill-ok' : 'pill-warn';
     const btns = (!isMe && u.role === 'worker')
-      ? `<button class="detail-quick-btn" style="background:var(--danger-light);color:var(--danger);border-color:var(--danger-light);padding:8px 14px;" onclick="doRemoveUser('${u.id}')">Remove</button>`
+      ? `<button class="detail-quick-btn" style="background:var(--danger-light);color:var(--danger);border-color:var(--danger-light);padding:8px 14px;" onclick="doRemoveUser('${u.id}')">${T('users.remove')}</button>`
       : '';
     return `<div class="card"><div style="padding:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:${btns?'10px':'0'};">
-        <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${esc(u.email)}</div>${isMe?'<div style="font-size:12px;color:var(--ink3);">You</div>':''}</div>
+        <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${esc(u.email)}</div>${isMe?`<div style="font-size:12px;color:var(--ink3);">${T('users.you')}</div>`:''}</div>
         <span class="pill ${rolePill}">${roleLabel}</span>
       </div>${btns?`<div>${btns}</div>`:''}
     </div></div>`;
   }).join('');
   if (pending?.length) {
-    html += `<div class="section-label" style="margin-top:20px;">Waiting to join</div>`;
+    html += `<div class="section-label" style="margin-top:20px;">${T('users.waiting')}</div>`;
     html += pending.map(u => {
       const btn = atMax
-        ? `<span style="font-size:12px;color:var(--ink3);">Stable full (max 5 users)</span>`
-        : `<button class="detail-quick-btn" style="background:var(--ok-light);color:var(--ok);border-color:var(--ok-light);padding:8px 16px;" onclick="doApproveUser('${u.id}')">Add to stable</button>`;
+        ? `<span style="font-size:12px;color:var(--ink3);">${T('users.full')}</span>`
+        : `<button class="detail-quick-btn" style="background:var(--ok-light);color:var(--ok);border-color:var(--ok-light);padding:8px 16px;" onclick="doApproveUser('${u.id}')">${T('users.add')}</button>`;
       return `<div class="card"><div style="padding:14px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="flex:1;font-weight:600;font-size:14px;">${esc(u.email)}</div>
-          <span class="pill pill-danger">Pending</span>
+          <span class="pill pill-danger">${T('users.pending')}</span>
         </div><div>${btn}</div>
       </div></div>`;
     }).join('');
@@ -2567,7 +3023,7 @@ async function doApproveUser(userId) {
 }
 
 async function doRemoveUser(userId) {
-  if (!confirm('Remove this worker from your stable?')) return;
+  if (!confirm(T('users.remove_confirm'))) return;
   try {
     await sbRpc('remove_user', { target_user_id: userId });
     renderUsers();
