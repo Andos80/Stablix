@@ -291,11 +291,23 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
       <input class="modal-input" type="email" id="l-email" placeholder="Email" autocomplete="email">
       <input class="modal-input" type="password" id="l-pass" placeholder="Password" autocomplete="current-password">
       <button class="modal-confirm" onclick="doLogin()">Sign in</button>
+      <div style="text-align:center;margin-top:12px;">
+        <button type="button" onclick="toggleForgot()" style="background:none;border:none;color:var(--ink3);font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);padding:0;">Forgot password?</button>
+      </div>
+      <div id="form-forgot" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:10px;">Enter your email and we'll send a reset link.</div>
+        <input class="modal-input" type="email" id="forgot-email" placeholder="Email" autocomplete="email">
+        <button class="modal-confirm" id="forgot-btn" onclick="doForgotPassword()">Send reset link</button>
+        <div id="forgot-msg" style="display:none;margin-top:10px;font-size:13px;color:var(--ok);text-align:center;padding:8px;background:var(--ok-light);border-radius:var(--radius-sm);"></div>
+      </div>
     </div>
     <div id="form-signup" style="display:none">
       <input class="modal-input" type="email" id="s-email" placeholder="Email" autocomplete="email">
       <input class="modal-input" type="password" id="s-pass" placeholder="Password (min 6 characters)" autocomplete="new-password">
       <button class="modal-confirm" onclick="doSignup()">Create account</button>
+      <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:14px;line-height:1.6;">
+        By creating an account you accept that your email address is stored to provide access to Stablix. Data is processed in accordance with GDPR. To request deletion of your account and data, contact the stable owner.
+      </div>
     </div>
   </div>
 </div>
@@ -2294,6 +2306,28 @@ function showAuthTab(tab) {
   document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
   document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
   document.getElementById('form-signup').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('forgot-msg').style.display = 'none';
+}
+
+function toggleForgot() {
+  const el = document.getElementById('form-forgot');
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+  document.getElementById('forgot-msg').style.display = 'none';
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { showAuthError('Please enter your email address.'); return; }
+  const btn = document.getElementById('forgot-btn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+  btn.textContent = 'Send reset link'; btn.disabled = false;
+  if (error) { showAuthError(error.message); return; }
+  const msg = document.getElementById('forgot-msg');
+  msg.textContent = 'Check your inbox — a reset link is on its way.';
+  msg.style.display = '';
   document.getElementById('auth-error').style.display = 'none';
 }
 
