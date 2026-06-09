@@ -775,13 +775,39 @@ input, textarea, select { -webkit-appearance: none; font-size: 16px; font-family
 
 <script>
 // ─── Supabase ─────────────────────────────────────────────────────────────────
+const SB_URL = 'https://ijdyzbfybvewhxprnlgl.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZHl6YmZ5YnZld2h4cHJubGdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI2MTEsImV4cCI6MjA5NjE0ODYxMX0.dTxwz8qs8C-YkYKRlYT8kvYBRCIU-Kf1fUSJQYUMVfE';
 const { createClient } = supabase;
-const _sb = createClient(
-  'https://ijdyzbfybvewhxprnlgl.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZHl6YmZ5YnZld2h4cHJubGdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI2MTEsImV4cCI6MjA5NjE0ODYxMX0.dTxwz8qs8C-YkYKRlYT8kvYBRCIU-Kf1fUSJQYUMVfE'
-);
+const _sb = createClient(SB_URL, SB_KEY);
 let currentUser = null;
 let currentProfile = null;
+let currentSession = null;
+
+function sbHeaders() {
+  const token = currentSession?.access_token;
+  if (!token) throw new Error('Not logged in');
+  return { 'apikey': SB_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
+async function sbGet(table, filter) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}${filter ? '?' + filter : ''}`, { headers: sbHeaders() });
+  if (!res.ok) throw new Error(`${table} fetch failed: ${res.status}`);
+  return res.json();
+}
+async function sbUpsert(table, body, onConflict) {
+  const headers = { ...sbHeaders(), 'Prefer': `resolution=merge-duplicates,return=minimal` };
+  if (onConflict) headers['Prefer'] += `,resolution=merge-duplicates`;
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST', headers, body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`${table} upsert failed: ${res.status}`);
+}
+async function sbRpc(fn, args) {
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST', headers: sbHeaders(), body: JSON.stringify(args)
+  });
+  if (!res.ok) { const t = await res.text(); throw new Error(t); }
+  return res.json().catch(() => null);
+}
 
 // ─── Data layer ───────────────────────────────────────────────────────────────
 
@@ -879,15 +905,19 @@ function runMigrations(d) {
   return d;
 }
 async function loadData() {
-  const { data, error } = await _sb.from('stable_data').select('data').eq('stable_id', currentProfile.stable_id).single();
-  if (error || !data) return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
-  return runMigrations(data.data);
+  try {
+    const rows = await sbGet('stable_data', `stable_id=eq.${currentProfile.stable_id}&select=data&limit=1`);
+    if (!rows?.length) return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
+    return runMigrations(rows[0].data);
+  } catch (e) {
+    console.error('loadData failed:', e);
+    return runMigrations({horses:{}, events:[], mealTimes:{breakfast:'07:00',lunch:'12:00',dinner:'18:00'}});
+  }
 }
 function saveData() {
   if (!currentUser || !currentProfile?.stable_id) return;
-  _sb.from('stable_data')
-    .upsert({ stable_id: currentProfile.stable_id, data: db, updated_at: new Date().toISOString() })
-    .then(({ error }) => { if (error) console.error('Save failed:', error.message); });
+  sbUpsert('stable_data', { stable_id: currentProfile.stable_id, data: db, updated_at: new Date().toISOString() })
+    .catch(e => console.error('Save failed:', e));
 }
 
 let db = {};
@@ -2336,8 +2366,13 @@ setTimeout(() => {
 }, 8000);
 
 async function loadProfile(userId) {
-  const { data } = await _sb.from('profiles').select('*').eq('id', userId).single();
-  return data;
+  try {
+    const rows = await sbGet('profiles', `id=eq.${userId}&limit=1`);
+    return rows?.[0] ?? null;
+  } catch (e) {
+    console.error('loadProfile failed:', e);
+    return null;
+  }
 }
 
 async function handleSession(userId) {
@@ -2348,6 +2383,7 @@ async function handleSession(userId) {
 }
 
 _sb.auth.onAuthStateChange(async (event, session) => {
+  currentSession = session;
   if (event === 'INITIAL_SESSION') {
     if (session) {
       currentUser = session.user;
@@ -2361,6 +2397,7 @@ _sb.auth.onAuthStateChange(async (event, session) => {
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     currentProfile = null;
+    currentSession = null;
     db = {};
     showLoginScreen();
   }
@@ -2373,11 +2410,15 @@ async function doCreateStable() {
   if (!name) { alert('Please enter a stable name.'); return; }
   const btn = document.querySelector('#pending-screen .modal-confirm');
   btn.textContent = 'Creating…'; btn.disabled = true;
-  const { error } = await _sb.rpc('create_stable', { stable_name: name });
-  btn.textContent = 'Create my stable'; btn.disabled = false;
-  if (error) { alert('Failed: ' + error.message); return; }
-  currentProfile = await loadProfile(currentUser.id);
-  await showApp();
+  try {
+    await sbRpc('create_stable', { stable_name: name });
+    currentProfile = await loadProfile(currentUser.id);
+    await showApp();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    btn.textContent = 'Create my stable'; btn.disabled = false;
+  }
 }
 
 async function doCheckApproval() {
@@ -2390,9 +2431,9 @@ async function renderUsers() {
   const list = document.getElementById('users-list');
   list.innerHTML = '<p class="empty-state" style="padding:8px 0;">Loading…</p>';
   const stableId = currentProfile?.stable_id;
-  const [{ data: members }, { data: pending }] = await Promise.all([
-    _sb.from('profiles').select('*').eq('stable_id', stableId).order('created_at'),
-    _sb.from('profiles').select('*').is('stable_id', null).order('created_at')
+  const [members, pending] = await Promise.all([
+    sbGet('profiles', `stable_id=eq.${stableId}&order=created_at`),
+    sbGet('profiles', `stable_id=is.null&order=created_at`)
   ]);
   const memberCount = members?.length || 0;
   const atMax = memberCount >= 5;
@@ -2430,16 +2471,18 @@ async function renderUsers() {
 }
 
 async function doApproveUser(userId) {
-  const { error } = await _sb.rpc('approve_user', { target_user_id: userId });
-  if (error) { alert('Failed: ' + error.message); return; }
-  renderUsers();
+  try {
+    await sbRpc('approve_user', { target_user_id: userId });
+    renderUsers();
+  } catch (e) { alert('Failed: ' + e.message); }
 }
 
 async function doRemoveUser(userId) {
   if (!confirm('Remove this worker from your stable?')) return;
-  const { error } = await _sb.rpc('remove_user', { target_user_id: userId });
-  if (error) { alert('Failed: ' + error.message); return; }
-  renderUsers();
+  try {
+    await sbRpc('remove_user', { target_user_id: userId });
+    renderUsers();
+  } catch (e) { alert('Failed: ' + e.message); }
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
