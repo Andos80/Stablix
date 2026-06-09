@@ -25,11 +25,12 @@ Stablix uses Supabase for authentication and cloud storage:
 - Each user has their own separate horses and data
 - An admin approves who gets access (hamburger menu → Users)
 - All changes save automatically to the cloud
+- Data syncs across devices — log in from any browser or phone
 
 ## Tech
 
 - Pure HTML / CSS / JavaScript — one self-contained file
-- Supabase — authentication and per-user cloud data storage
+- Supabase — authentication and per-stable cloud data storage (raw fetch against REST API for reliability)
 - CSS custom properties for the full colour theme
 - Inline SVG icons, Google Fonts (DM Serif Display + DM Sans)
 - `100dvh` layout, `safe-area-inset` padding — works correctly on iOS notch devices
