@@ -17,6 +17,10 @@ Stablix helps you track everything that matters for a small stable:
 - **Notes** — journal per horse
 - **Files** — photos, videos, and documents per horse
 
+## Language
+
+Stablix supports Norwegian and English. Switch between them with the flag button in the top bar — all UI text, labels, and activity types update instantly. The preference is saved per device.
+
 ## Multi-user
 
 Stablix uses Supabase for authentication and cloud storage:
@@ -46,3 +50,5 @@ Stablix stores your email address to provide access to the service. Data is proc
 - **Bottom bar** — Home, Calendar, Horses, Feeding plan
 - **Hamburger menu** — full section list, export/import, users (admin), sign out
 - **+ button** — context-sensitive add action from any screen
+- **Flag button** — toggle between Norwegian and English
+- **Sun/moon button** — toggle between light and dark mode
