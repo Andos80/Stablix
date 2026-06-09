@@ -22,10 +22,15 @@ Stablix helps you track everything that matters for a small stable:
 Stablix uses Supabase for authentication and cloud storage:
 
 - Each user logs in with email and password
+- Forgot your password? Use the "Forgot password?" link on the sign-in screen — a reset link is sent to your email
 - Each user has their own separate horses and data
 - An admin approves who gets access (hamburger menu → Users)
 - All changes save automatically to the cloud
 - Data syncs across devices — log in from any browser or phone
+
+## Privacy
+
+Stablix stores your email address to provide access to the service. Data is processed in accordance with GDPR. To request deletion of your account and data, contact the stable owner.
 
 ## Tech
 
